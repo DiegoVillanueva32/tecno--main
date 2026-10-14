@@ -1,0 +1,318 @@
+{%- comment -%}
+  Tecno+ Apple Style Hero Section
+{%- endcomment -%}
+
+<section class="tp-hero-section" id="hero-{{ section.id }}">
+  <div class="tp-hero-bg">
+    {%- if section.settings.image != blank -%}
+      {{
+        section.settings.image
+        | image_url: width: 2800
+        | image_tag:
+          loading: 'eager',
+          fetchpriority: 'high',
+          class: 'tp-hero-bg-img',
+          alt: section.settings.title | escape
+      }}
+    {%- else -%}
+      <img
+        src="https://cdn.shopify.com/s/files/1/0667/5903/2972/files/fondotecnopage_017b9104-a80d-4134-99b0-80e460b1197c.jpg?v=1791928273"
+        alt="Tecno+ Tecnología"
+        class="tp-hero-bg-img"
+        loading="eager"
+        fetchpriority="high"
+      >
+    {%- endif -%}
+    <div class="tp-hero-bg-overlay"></div>
+    <div class="tp-hero-bg-bottom-fade"></div>
+  </div>
+
+  <div class="tp-hero-container">
+    <div class="tp-hero-content">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="tp-eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+
+      <h1 class="tp-hero-title">
+        {{ section.settings.title | default: 'La tecnología que quieres <span>más cerca de ti.</span>' }}
+      </h1>
+
+      {%- if section.settings.subtitle != blank -%}
+        <p class="tp-hero-subtitle">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+
+      <div class="tp-hero-actions">
+        {%- if section.settings.btn1_text != blank -%}
+          <a
+            href="{{ section.settings.btn1_link | default: '/collections/all' }}"
+            class="tp-btn tp-btn-primary"
+          >
+            {{ section.settings.btn1_text }}
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.btn2_text != blank -%}
+          <a
+            href="{{ section.settings.btn2_link | default: 'https://wa.me/573043547935?text=Hola%20Tecno%2B%2C%20quiero%20asesor%C3%ADa%20para%20elegir%20un%20producto' }}"
+            class="tp-btn tp-btn-secondary"
+            {% if section.settings.btn2_link contains 'wa.me' or section.settings.btn2_link contains 'http' %}
+              target="_blank" rel="noopener noreferrer"
+            {% endif %}
+          >
+            {{ section.settings.btn2_text }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .tp-hero-section {
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 65px);
+    min-height: calc(100dvh - 65px);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: #ffffff;
+    padding: 60px 0 80px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  }
+
+  .tp-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .tp-hero-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    display: block;
+  }
+
+  /* Overlay gradient: ensures crystal clear text on left */
+  .tp-hero-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(255, 255, 255, 0.90) 36%,
+      rgba(255, 255, 255, 0.45) 58%,
+      rgba(255, 255, 255, 0) 78%
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Soft fade into next section */
+  .tp-hero-bg-bottom-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to top, #ffffff 10%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .tp-hero-container {
+    width: min(1200px, calc(100% - 48px));
+    margin: 0 auto;
+    position: relative;
+    z-index: 4;
+  }
+
+  .tp-hero-content {
+    max-width: 620px;
+    text-align: left;
+  }
+
+  .tp-eyebrow {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    font-weight: 800;
+    color: #e02424;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .tp-hero-title {
+    font-size: clamp(40px, 5.5vw, 68px);
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+    margin: 12px 0 28px;
+    font-weight: 900;
+    color: #111111;
+  }
+
+  .tp-hero-title span {
+    color: #e02424;
+  }
+
+  .tp-hero-subtitle {
+    color: #666666;
+    font-size: 17px;
+    line-height: 1.6;
+    margin: 0 0 32px;
+    max-width: 520px;
+  }
+
+  .tp-hero-actions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .tp-btn {
+    padding: 14px 26px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: none;
+    line-height: 1;
+  }
+
+  .tp-btn-primary {
+    background: #e02424;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(224, 36, 36, 0.3);
+  }
+
+  .tp-btn-primary:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(224, 36, 36, 0.4);
+    color: #ffffff !important;
+  }
+
+  .tp-btn-secondary {
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    color: #111111 !important;
+  }
+
+  .tp-btn-secondary:hover {
+    border-color: #888888;
+    background: #fbfbfb;
+    transform: translateY(-2px);
+    color: #111111 !important;
+  }
+
+  @media (max-width: 900px) {
+    .tp-hero-section {
+      min-height: 72vh;
+      padding: 60px 0;
+    }
+    .tp-hero-bg-img {
+      object-position: 70% center;
+    }
+    .tp-hero-bg-overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.88) 55%,
+        rgba(255, 255, 255, 0.4) 100%
+      );
+    }
+    .tp-hero-content {
+      max-width: 100%;
+      text-align: center;
+    }
+    .tp-hero-actions {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .tp-hero-section {
+      padding: 45px 0 55px;
+      min-height: 68vh;
+    }
+    .tp-hero-title {
+      font-size: 36px;
+      margin: 10px 0 20px;
+    }
+    .tp-hero-container {
+      width: calc(100% - 32px);
+    }
+    .tp-btn {
+      width: 100%;
+      padding: 13px 20px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Tecno+ Hero Section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Imagen de fondo (opcional, si está vacía usa la oficial)"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Etiqueta superior",
+      "default": "TECNO+"
+    },
+    {
+      "type": "html",
+      "id": "title",
+      "label": "Título Principal (HTML permitido para destacar color)",
+      "default": "La tecnología que quieres <span>más cerca de ti.</span>"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo (opcional)"
+    },
+    {
+      "type": "text",
+      "id": "btn1_text",
+      "label": "Texto Botón 1",
+      "default": "Ver productos"
+    },
+    {
+      "type": "url",
+      "id": "btn1_link",
+      "label": "Enlace Botón 1"
+    },
+    {
+      "type": "text",
+      "id": "btn2_text",
+      "label": "Texto Botón 2",
+      "default": "Hablar con un asesor"
+    },
+    {
+      "type": "url",
+      "id": "btn2_link",
+      "label": "Enlace Botón 2"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tecno+ Hero Section"
+    }
+  ]
+}
+{% endschema %}

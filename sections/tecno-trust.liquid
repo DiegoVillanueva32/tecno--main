@@ -1,0 +1,166 @@
+{%- comment -%}
+  Tecno+ Trust Bar (Beneficios)
+{%- endcomment -%}
+
+<div class="tp-trust-wrapper">
+  <div class="tp-trust-container">
+    <div class="tp-trust-grid">
+      <div class="tp-trust-item">
+        <b>{{ section.settings.title_1 | default: 'Envíos a Colombia' }}</b>
+        <span>{{ section.settings.sub_1 | default: 'Despachos de 24–48 horas' }}</span>
+      </div>
+      <div class="tp-trust-item">
+        <b>{{ section.settings.title_2 | default: 'Compra segura' }}</b>
+        <span>{{ section.settings.sub_2 | default: 'Medios de pago disponibles' }}</span>
+      </div>
+      <div class="tp-trust-item">
+        <b>{{ section.settings.title_3 | default: 'Garantía' }}</b>
+        <span>{{ section.settings.sub_3 | default: 'Respaldo para tus equipos' }}</span>
+      </div>
+      <div class="tp-trust-item">
+        <b>{{ section.settings.title_4 | default: 'Asesoría local' }}</b>
+        <span>{{ section.settings.sub_4 | default: 'Estamos en Montería' }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .tp-trust-wrapper {
+    background: #ffffff;
+    width: 100%;
+    border-bottom: 1px solid #eeeeee;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  }
+
+  .tp-trust-container {
+    width: min(1200px, calc(100% - 48px));
+    margin: 0 auto;
+  }
+
+  .tp-trust-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid #e8e8ea;
+    border-top: 0;
+    background: #ffffff;
+  }
+
+  .tp-trust-item {
+    padding: 22px 16px;
+    text-align: center;
+    border-right: 1px solid #e8e8ea;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .tp-trust-item:last-child {
+    border-right: 0;
+  }
+
+  .tp-trust-item b {
+    display: block;
+    font-size: 13.5px;
+    margin-bottom: 4px;
+    color: #111111;
+    font-weight: 700;
+  }
+
+  .tp-trust-item span {
+    font-size: 12px;
+    color: #70757d;
+  }
+
+  @media (max-width: 900px) {
+    .tp-trust-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .tp-trust-item:nth-child(2) {
+      border-right: 0;
+    }
+    .tp-trust-item:nth-child(1),
+    .tp-trust-item:nth-child(2) {
+      border-bottom: 1px solid #e8e8ea;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .tp-trust-container {
+      width: calc(100% - 32px);
+    }
+    .tp-trust-grid {
+      grid-template-columns: 1fr;
+    }
+    .tp-trust-item {
+      border-right: 0;
+      border-bottom: 1px solid #e8e8ea;
+      padding: 16px;
+    }
+    .tp-trust-item:last-child {
+      border-bottom: 0;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Tecno+ Trust Bar",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title_1",
+      "label": "Título 1",
+      "default": "Envíos a Colombia"
+    },
+    {
+      "type": "text",
+      "id": "sub_1",
+      "label": "Subtítulo 1",
+      "default": "Despachos de 24–48 horas"
+    },
+    {
+      "type": "text",
+      "id": "title_2",
+      "label": "Título 2",
+      "default": "Compra segura"
+    },
+    {
+      "type": "text",
+      "id": "sub_2",
+      "label": "Subtítulo 2",
+      "default": "Medios de pago disponibles"
+    },
+    {
+      "type": "text",
+      "id": "title_3",
+      "label": "Título 3",
+      "default": "Garantía"
+    },
+    {
+      "type": "text",
+      "id": "sub_3",
+      "label": "Subtítulo 3",
+      "default": "Respaldo para tus equipos"
+    },
+    {
+      "type": "text",
+      "id": "title_4",
+      "label": "Título 4",
+      "default": "Asesoría local"
+    },
+    {
+      "type": "text",
+      "id": "sub_4",
+      "label": "Subtítulo 4",
+      "default": "Estamos en Montería"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tecno+ Trust Bar"
+    }
+  ]
+}
+{% endschema %}

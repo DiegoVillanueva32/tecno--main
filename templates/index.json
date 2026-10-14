@@ -1,0 +1,82 @@
+{
+  "sections": {
+    "tecno_hero": {
+      "type": "tecno-hero",
+      "settings": {
+        "eyebrow": "TECNO+",
+        "title": "La tecnología que quieres <span>más cerca de ti.</span>",
+        "btn1_text": "Ver productos",
+        "btn1_link": "/collections/all",
+        "btn2_text": "Hablar con un asesor",
+        "btn2_link": "https://wa.me/573043547935?text=Hola%20Tecno%2B%2C%20quiero%20asesor%C3%ADa%20para%20elegir%20un%20producto"
+      }
+    },
+    "tecno_trust": {
+      "type": "tecno-trust",
+      "settings": {
+        "title_1": "Envíos a Colombia",
+        "sub_1": "Despachos de 24–48 horas",
+        "title_2": "Compra segura",
+        "sub_2": "Medios de pago disponibles",
+        "title_3": "Garantía",
+        "sub_3": "Respaldo para tus equipos",
+        "title_4": "Asesoría local",
+        "sub_4": "Estamos en Montería"
+      }
+    },
+    "tecno_destacados": {
+      "type": "tecno-featured-products",
+      "settings": {
+        "title": "Dispositivos destacados",
+        "description": "Equipos nuevos y listos para acompañarte todos los días. Compra 100% segura con tarjeta, PSE o transferencia.",
+        "products_to_show": 4,
+        "button_theme": "red"
+      }
+    },
+    "tecno_gamer": {
+      "type": "tecno-gamer",
+      "settings": {
+        "eyebrow": "MUNDO GAMER",
+        "title": "Consola Game Stick Pro 4K",
+        "description": "Juega donde quieras: compatible con televisores, computadores y pantallas HDMI. Incluye 2 controles inalámbricos, miles de juegos retro clásicos y resolución 4K Plug & Play.",
+        "price": "$180.000 COP",
+        "btn_text": "Comprar consola"
+      }
+    },
+    "tecno_catalogo": {
+      "type": "tecno-catalog-preview",
+      "settings": {
+        "eyebrow": "",
+        "title": "Catálogo",
+        "description": "Computadores, teléfonos, audio y tecnología de alto nivel para hacer tu día más cómodo y productivo.",
+        "products_to_show": 8,
+        "btn_text": "Ver catálogo",
+        "btn_link": "/collections/all"
+      }
+    },
+    "tecno_combos": {
+      "type": "tecno-combos",
+      "settings": {
+        "eyebrow": "AHORRA MÁS",
+        "title": "Combos Tecno+",
+        "description": "Paquetes seleccionados para llevar más tecnología por un solo precio."
+      }
+    },
+    "tecno_reviews": {
+      "type": "tecno-reviews",
+      "settings": {
+        "title": "Lo que dicen nuestros clientes",
+        "description": "Experiencias de compradores en Montería y Colombia. Haz clic en cualquier tarjeta para enfocarla."
+      }
+    }
+  },
+  "order": [
+    "tecno_hero",
+    "tecno_trust",
+    "tecno_destacados",
+    "tecno_gamer",
+    "tecno_catalogo",
+    "tecno_combos",
+    "tecno_reviews"
+  ]
+}

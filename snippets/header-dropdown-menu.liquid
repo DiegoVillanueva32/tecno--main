@@ -1,0 +1,89 @@
+{% comment %}
+  Tecno+ Header Navigation Menu (Matches React Storefront)
+{% endcomment %}
+
+<nav class="header__inline-menu">
+  <ul class="list-menu list-menu--inline" role="list">
+    <li>
+      <a href="{{ routes.root_url }}#celulares" class="header__menu-item list-menu__item link link--text focus-inset">
+        <span>Celulares</span>
+      </a>
+    </li>
+    <li>
+      <a href="/collections/all" class="header__menu-item list-menu__item link link--text focus-inset{% if request.page_type == 'collection' or request.path contains '/collections/all' %} tp-nav-active{% endif %}">
+        <span class="tp-nav-text">Catálogo</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ routes.root_url }}#combos" class="header__menu-item list-menu__item link link--text focus-inset">
+        <span>Combos</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ routes.root_url }}#opiniones" class="header__menu-item list-menu__item link link--text focus-inset">
+        <span>Opiniones</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ routes.root_url }}#gaming" class="header__menu-item list-menu__item link link--text focus-inset">
+        <span>Gaming</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ routes.root_url }}#beneficios" class="header__menu-item list-menu__item link link--text focus-inset">
+        <span>Beneficios</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ 'contratacion.pdf' | asset_url }}" target="_blank" rel="noopener noreferrer" class="header__menu-item list-menu__item link link--text focus-inset" title="Ver documento de contratación (PDF)">
+        <span>Contratación</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<style>
+  .header__heading,
+  .header__heading-link {
+    min-width: max-content !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .header__inline-menu .list-menu--inline {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .header__inline-menu .header__menu-item {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4b5563;
+    padding: 6px 9px;
+    position: relative;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+
+  .header__inline-menu .header__menu-item:hover {
+    color: #111111;
+  }
+
+  .header__inline-menu .header__menu-item.tp-nav-active {
+    color: #e02424 !important;
+    font-weight: 700;
+  }
+
+  .header__inline-menu .header__menu-item.tp-nav-active::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 11px;
+    right: 11px;
+    height: 2px;
+    background: #e02424;
+    border-radius: 999px;
+  }
+</style>

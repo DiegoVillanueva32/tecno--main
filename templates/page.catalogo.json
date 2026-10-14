@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "tecno_full_catalog": {
+      "type": "tecno-full-catalog",
+      "settings": {}
+    }
+  },
+  "order": [
+    "tecno_full_catalog"
+  ]
+}

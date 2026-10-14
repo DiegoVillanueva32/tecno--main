@@ -1,0 +1,2142 @@
+{%- comment -%}
+  Tecno+ Checkout Drawer con Pasarela Oficial Bold.co y Mapa Interactivo de Direcciones de Colombia
+  - Pagos 100% seguros y directos con Bold (PSE, Nequi, Tarjetas, Bancolombia) y visualización en mapa de entrega.
+{%- endcomment -%}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<div id="tp-checkout-drawer" class="tp-drawer-backdrop" style="display: none;" onclick="if(event.target===this) window.closeCheckout()">
+  <div class="tp-drawer-panel" onclick="event.stopPropagation()">
+    {%- comment -%} Drawer Header {%- endcomment -%}
+    <div class="tp-drawer-header">
+      <div class="tp-drawer-header-left">
+        <div class="tp-drawer-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
+        </div>
+        <div>
+          <div class="tp-drawer-title-row">
+            <h2>Finalizar Compra</h2>
+            <span class="tp-badge-bold">Bold & Contra Entrega</span>
+          </div>
+          <p class="tp-drawer-subtitle">Paga online seguro con Bold o en efectivo al recibir con Coordinadora</p>
+        </div>
+      </div>
+      <button type="button" class="tp-drawer-close-btn" onclick="window.closeCheckout()" aria-label="Cerrar checkout">
+        ✕
+      </button>
+    </div>
+
+    {%- comment -%} Drawer Body {%- endcomment -%}
+    <div class="tp-drawer-body">
+      {%- comment -%} STEP 1: FORMULARIO {%- endcomment -%}
+      <div id="tp-checkout-step-form">
+        {%- comment -%} Resumen de Compra {%- endcomment -%}
+        <div class="tp-order-summary-box">
+          <div class="tp-summary-top">
+            <span class="tp-summary-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+              </svg>
+              <span>Resumen de tu pedido</span>
+            </span>
+            <span class="tp-summary-total-price" id="tp-summary-total">$ 0</span>
+          </div>
+
+          <div class="tp-summary-items-list" id="tp-summary-items">
+            {%- comment -%} Items inyectados por JS {%- endcomment -%}
+          </div>
+
+          <div class="tp-summary-shipping">
+            <span>Envío a Montería y toda Colombia:</span>
+            <span class="tp-free-shipping">¡GRATIS!</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e5e7eb;">
+            <button type="button" onclick="window.closeCheckout()" style="background: none; border: none; color: #e02424; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0;">
+              <span>← Añadir más productos</span>
+            </button>
+            <span style="font-size: 11.5px; color: #9ca3af;">Multicompras habilitadas</span>
+          </div>
+        </div>
+
+        {%- comment -%} Alerta de Validación {%- endcomment -%}
+        <div id="tp-validation-error" class="tp-alert-error" style="display: none;"></div>
+
+        <form id="tp-checkout-form" onsubmit="handleCheckoutSubmit(event)">
+          {%- comment -%} SECCIÓN 1: DATOS DE CONTACTO Y ENTREGA {%- endcomment -%}
+          <div class="tp-form-section">
+            <div class="tp-section-heading">
+              <span class="tp-step-number">1</span>
+              <h3>Datos de Entrega y Contacto</h3>
+            </div>
+
+            <div class="tp-input-group">
+              <label for="tp-input-name">Nombre y Apellidos completos *</label>
+              <input type="text" id="tp-input-name" required placeholder="Ej. Juan Carlos Pérez">
+            </div>
+
+            <div class="tp-input-row">
+              <div class="tp-input-group">
+                <label for="tp-input-phone">WhatsApp / Celular *</label>
+                <input type="tel" id="tp-input-phone" required placeholder="Ej. 304 354 7935">
+              </div>
+              <div class="tp-input-group">
+                <label for="tp-input-email">Correo Electrónico (Para factura Bold) *</label>
+                <input type="email" id="tp-input-email" required placeholder="cliente@ejemplo.com">
+              </div>
+            </div>
+
+            <div class="tp-input-row">
+              <div class="tp-input-group">
+                <label for="tp-select-doc-type">Tipo de Documento *</label>
+                <select id="tp-select-doc-type" required>
+                  <option value="CC" selected>Cédula de Ciudadanía (CC)</option>
+                  <option value="TI">Tarjeta de Identidad (TI)</option>
+                  <option value="CE">Cédula de Extranjería (CE)</option>
+                  <option value="PP">Pasaporte</option>
+                  <option value="NIT">NIT / RUT</option>
+                  <option value="PEP">Permiso Especial (PPT / PEP)</option>
+                </select>
+              </div>
+              <div class="tp-input-group">
+                <label for="tp-input-doc">Número de Documento *</label>
+                <input type="text" id="tp-input-doc" required placeholder="Ej. 1067894562">
+              </div>
+            </div>
+
+            {%- comment -%} Selector de Ciudades de Colombia {%- endcomment -%}
+            <div class="tp-input-row">
+              <div class="tp-input-group">
+                <label for="tp-select-city">Ciudad / Municipio de Entrega *</label>
+                <select id="tp-select-city" onchange="handleCityChange(this.value)">
+                  <optgroup label="Córdoba (Despacho Local Inmediato)">
+                    <option value="Montería|Córdoba" selected>Montería (Córdoba)</option>
+                    <option value="Cereté|Córdoba">Cereté (Córdoba)</option>
+                    <option value="Sahagún|Córdoba">Sahagún (Córdoba)</option>
+                    <option value="Lorica|Córdoba">Lorica (Córdoba)</option>
+                    <option value="Planeta Rica|Córdoba">Planeta Rica (Córdoba)</option>
+                    <option value="Montelíbano|Córdoba">Montelíbano (Córdoba)</option>
+                    <option value="Tierralta|Córdoba">Tierralta (Córdoba)</option>
+                  </optgroup>
+                  <optgroup label="Principales Ciudades de Colombia">
+                    <option value="Bogotá D.C.|Cundinamarca">Bogotá D.C. (Cundinamarca)</option>
+                    <option value="Medellín|Antioquia">Medellín (Antioquia)</option>
+                    <option value="Barranquilla|Atlántico">Barranquilla (Atlántico)</option>
+                    <option value="Cartagena|Bolívar">Cartagena (Bolívar)</option>
+                    <option value="Cali|Valle del Cauca">Cali (Valle del Cauca)</option>
+                    <option value="Bucaramanga|Santander">Bucaramanga (Santander)</option>
+                    <option value="Sincelejo|Sucre">Sincelejo (Sucre)</option>
+                    <option value="Santa Marta|Magdalena">Santa Marta (Magdalena)</option>
+                    <option value="Valledupar|Cesar">Valledupar (Cesar)</option>
+                    <option value="Cúcuta|Norte de Santander">Cúcuta (Norte de Santander)</option>
+                    <option value="Pereira|Risaralda">Pereira (Risaralda)</option>
+                    <option value="Manizales|Caldas">Manizales (Caldas)</option>
+                    <option value="Armenia|Quindío">Armenia (Quindío)</option>
+                    <option value="Ibagué|Tolima">Ibagué (Tolima)</option>
+                    <option value="Villavicencio|Meta">Villavicencio (Meta)</option>
+                    <option value="Neiva|Huila">Neiva (Huila)</option>
+                    <option value="Pasto|Nariño">Pasto (Nariño)</option>
+                    <option value="Popayán|Cauca">Popayán (Cauca)</option>
+                    <option value="Riohacha|La Guajira">Riohacha (La Guajira)</option>
+                    <option value="Tunja|Boyacá">Tunja (Boyacá)</option>
+                    <option value="Otro|Colombia">Otro municipio / ciudad...</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div class="tp-input-group" id="tp-custom-city-wrap" style="display: none;">
+                <label for="tp-input-custom-city">Escribe tu ciudad y departamento *</label>
+                <input type="text" id="tp-input-custom-city" placeholder="Ej. Girardot, Cundinamarca">
+              </div>
+            </div>
+
+            <div class="tp-input-group">
+              <label for="tp-input-address">Dirección exacta de entrega (Calle, Carrera, Manzana, Lote) *</label>
+              <input type="text" id="tp-input-address" required placeholder="Ej. Calle 29 # 14 - 35, Barrio La Castellana">
+            </div>
+
+            {%- comment -%} Tipo de vivienda {%- endcomment -%}
+            <div class="tp-input-group">
+              <label>Tipo de lugar de entrega</label>
+              <div class="tp-housing-pills">
+                <button type="button" class="tp-housing-btn active" data-type="Casa" onclick="setHousingType('Casa', this)">🏠 Casa</button>
+                <button type="button" class="tp-housing-btn" data-type="Apartamento" onclick="setHousingType('Apartamento', this)">🏢 Apartamento</button>
+                <button type="button" class="tp-housing-btn" data-type="Conjunto" onclick="setHousingType('Conjunto', this)">🏘️ Conjunto</button>
+                <button type="button" class="tp-housing-btn" data-type="Local/Oficina" onclick="setHousingType('Local/Oficina', this)">💼 Local / Oficina</button>
+              </div>
+            </div>
+
+            <div class="tp-input-row">
+              <div class="tp-input-group">
+                <label for="tp-input-building">Edificio / Conjunto / Apto (Opcional)</label>
+                <input type="text" id="tp-input-building" placeholder="Ej. Torre 2 Apto 504">
+              </div>
+              <div class="tp-input-group">
+                <label for="tp-input-ref">Punto de referencia (Opcional)</label>
+                <input type="text" id="tp-input-ref" placeholder="Ej. Al lado del Oxxo">
+              </div>
+            </div>
+
+            {%- comment -%} Ubicación y Mapa Interactivo {%- endcomment -%}
+            <div class="tp-map-container-wrap">
+              <div class="tp-map-header-row">
+                <label class="tp-map-label">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="#e02424"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                  <span>Confirma tu ubicación exacta en el mapa:</span>
+                </label>
+                <button type="button" class="tp-map-locate-btn" onclick="captureUserGps()">
+                  <span>🎯 Mi GPS actual</span>
+                </button>
+              </div>
+              <div class="tp-map-viewport">
+                <div id="tp-checkout-map"></div>
+                <div class="tp-map-badge-instruction">
+                  <span>Arrastra el pin 📍 o toca el mapa para marcar tu casa/edificio</span>
+                </div>
+              </div>
+              <div id="tp-gps-status" class="tp-map-status"></div>
+              <input type="hidden" id="tp-input-maps-url" value="">
+              <input type="hidden" id="tp-input-lat" value="8.7509">
+              <input type="hidden" id="tp-input-lng" value="-75.8814">
+            </div>
+          </div>
+
+          {%- comment -%} SECCIÓN 2: MÉTODO DE PAGO {%- endcomment -%}
+          <div class="tp-form-section">
+            <div class="tp-section-heading">
+              <span class="tp-step-number">2</span>
+              <h3>Método de Pago</h3>
+            </div>
+
+            <div class="tp-payment-options">
+              {%- comment -%} Pago Contra Entrega con Coordinadora {%- endcomment -%}
+              <label class="tp-pay-option" id="tp-pay-opt-cod" onclick="selectPaymentMethod('cod')">
+                <input type="radio" name="payment_method" value="cod" onchange="selectPaymentMethod('cod')">
+                <div class="tp-pay-content">
+                  <div class="tp-pay-title-row">
+                    <span class="tp-pay-title">Pago Contra Entrega (Coordinadora)</span>
+                    <span class="tp-pay-badge-cod">PAGA EN CASA</span>
+                  </div>
+                  <p class="tp-pay-desc">
+                    Pagas en efectivo al transportador de <b>Coordinadora</b> cuando recibas el paquete en tu puerta. Sin anticipos.
+                  </p>
+                  <div class="tp-pay-badges">
+                    <span class="tp-brand-badge coord">📦 Coordinadora</span>
+                    <span class="tp-brand-badge cash">💵 Efectivo al recibir</span>
+                    <span class="tp-brand-badge check">✓ 100% Confiable</span>
+                  </div>
+                </div>
+              </label>
+
+              {%- comment -%} Pasarela Bold (Pago Online Inmediato) {%- endcomment -%}
+              <label class="tp-pay-option active" id="tp-pay-opt-bold" onclick="selectPaymentMethod('bold')">
+                <input type="radio" name="payment_method" value="bold" checked onchange="selectPaymentMethod('bold')">
+                <div class="tp-pay-content">
+                  <div class="tp-pay-title-row">
+                    <span class="tp-pay-title">Pago Online Inmediato (Bold.co)</span>
+                    <span class="tp-pay-rec-badge">PSE / TARJETAS</span>
+                  </div>
+                  <p class="tp-pay-desc">
+                    Pagas de inmediato con Tarjetas de Crédito / Débito, PSE, Nequi o Botón Bancolombia con cifrado bancario TLS.
+                  </p>
+                  <div class="tp-pay-badges">
+                    <span class="tp-brand-badge visa">VISA</span>
+                    <span class="tp-brand-badge mastercard">Mastercard</span>
+                    <span class="tp-brand-badge pse">PSE</span>
+                    <span class="tp-brand-badge nequi">Nequi</span>
+                    <span class="tp-brand-badge bancolombia">Bancolombia</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {%- comment -%} Botón de Envío / Pago {%- endcomment -%}
+          <div class="tp-submit-wrap">
+            <button type="submit" id="tp-submit-btn" class="tp-submit-btn">
+              <span id="tp-submit-btn-text">Pagar con Bold $ 0</span>
+              <span>→</span>
+            </button>
+            <div class="tp-trust-footer" id="tp-trust-footer">
+              <span>🔒 Pasarela Bold.co</span>
+              <span>·</span>
+              <span>Protección al Comprador</span>
+              <span>·</span>
+              <span>Despacho 24-48h</span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {%- comment -%} STEP 2: PROCESANDO CON BOLD {%- endcomment -%}
+      <div id="tp-checkout-step-bold" style="display: none;" class="tp-bold-ready-view">
+        <div class="tp-bold-header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
+        </div>
+        <h3>¡Tu orden está lista para pagar!</h3>
+        <p class="tp-bold-subtitle">Haz clic en el botón oficial de Bold para completar tu pago de forma 100% segura con PSE, Nequi o Tarjeta.</p>
+
+        <div class="tp-bold-order-card">
+          <div class="tp-bold-row">
+            <span>Referencia de Pedido:</span>
+            <b id="tp-bold-order-ref" class="font-mono">TP-000000</b>
+          </div>
+          <div class="tp-bold-row border-top">
+            <span>Total a Pagar:</span>
+            <b id="tp-bold-order-amount" class="tp-bold-amount">$ 0</b>
+          </div>
+        </div>
+
+        {%- comment -%} Contenedor donde Bold inyecta su botón embebido {%- endcomment -%}
+        <div id="tp-bold-button-mount" class="tp-bold-mount">
+          <div class="tp-bold-loading-spinner"></div>
+          <p style="font-size: 12px; color: #70757d; margin-top: 8px;">Cargando botón seguro de Bold.co...</p>
+        </div>
+
+        <button type="button" class="tp-bold-back-btn" onclick="returnToCheckoutForm()">
+          ← Volver y editar datos de entrega
+        </button>
+      </div>
+
+      {%- comment -%} STEP 3: SUCCESS (CONTRA ENTREGA) {%- endcomment -%}
+      <div id="tp-checkout-step-success" style="display: none;" class="tp-success-view">
+        <div class="tp-success-icon">✓</div>
+        <span class="tp-badge-success">¡Pedido Confirmado!</span>
+        <h3 id="tp-success-client-name">¡Gracias por tu compra!</h3>
+        <p class="tp-success-desc">
+          Tu pedido ha sido registrado con éxito para <b>Pago Contra Entrega con Coordinadora</b>. Te enviaremos el número de guía para que puedas rastrear tu paquete.
+        </p>
+
+        <div class="tp-receipt-box">
+          <div class="tp-receipt-row">
+            <span>Número de Pedido:</span>
+            <b id="tp-receipt-id" class="font-mono">TP-0000</b>
+          </div>
+          <div class="tp-receipt-row">
+            <span>Total a Pagar al Recibir:</span>
+            <b id="tp-receipt-total" class="tp-bold-amount">$ 0</b>
+          </div>
+          <div class="tp-receipt-row">
+            <span>Transportadora:</span>
+            <b style="color: #0284c7;">📦 Coordinadora (RAD - Recaudo Contra Entrega)</b>
+          </div>
+          <div class="tp-receipt-row">
+            <span>Método de Pago:</span>
+            <b>Efectivo al recibir en tu puerta</b>
+          </div>
+          <div class="tp-receipt-row">
+            <span>Dirección de Entrega:</span>
+            <span id="tp-receipt-address" style="text-align: right; font-weight: 600;"></span>
+          </div>
+        </div>
+
+        <!-- Confirmación de Notificación Automática al Correo Oficial -->
+        <div style="margin-top: 18px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 16px; text-align: left;">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; color: #166534; font-size: 13.5px;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            <span>Notificación Enviada Automáticamente</span>
+          </div>
+          <p style="font-size: 12px; color: #15803d; line-height: 1.45; margin: 6px 0 0;">
+            Los detalles y especificaciones completas de este pedido se han enviado de forma 100% automática al correo de despacho: <b style="color: #0f172a; word-break: break-all;">martinezserpa23@gmail.com</b>
+          </p>
+        </div>
+
+        <button type="button" class="tp-submit-btn" style="margin-top: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; border: none;" onclick="window.closeCheckout(); location.reload();">
+          Seguir Explorando Catálogo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .tp-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+    z-index: 999999;
+    display: flex;
+    justify-content: flex-end;
+    animation: tpFadeIn 0.25s ease;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  }
+
+  @keyframes tpFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .tp-drawer-panel {
+    background: #ffffff;
+    width: 100%;
+    max-width: 520px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -15px 0 40px rgba(0, 0, 0, 0.25);
+    animation: tpSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes tpSlideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  .tp-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8e8ea;
+    background: #fafafa;
+  }
+
+  .tp-drawer-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tp-drawer-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #111111;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tp-drawer-icon-box svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .tp-drawer-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tp-drawer-title-row h2 {
+    font-size: 16px;
+    font-weight: 900;
+    color: #111111;
+    margin: 0;
+  }
+
+  .tp-badge-bold {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .tp-drawer-subtitle {
+    font-size: 11px;
+    color: #70757d;
+    margin: 2px 0 0;
+  }
+
+  .tp-drawer-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .tp-drawer-close-btn:hover {
+    background: #f3f4f6;
+    color: #111111;
+  }
+
+  .tp-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  /* Order Summary */
+  .tp-order-summary-box {
+    background: #fafafa;
+    border: 1px solid #e8e8ea;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+
+  .tp-summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+  }
+
+  .tp-summary-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #111111;
+  }
+
+  .tp-summary-total-price {
+    font-size: 15px;
+    font-weight: 900;
+    color: #e02424;
+  }
+
+  .tp-summary-items-list {
+    margin: 10px 0;
+    max-height: 140px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tp-summary-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11.5px;
+    color: #374151;
+  }
+
+  .tp-summary-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  .tp-summary-item-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .tp-summary-item-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+  }
+
+  .tp-summary-shipping {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 8px;
+    font-size: 11px;
+    color: #70757d;
+  }
+
+  .tp-free-shipping {
+    color: #059669;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .tp-alert-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  /* Form Layout */
+  .tp-form-section {
+    margin-bottom: 22px;
+  }
+
+  .tp-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .tp-step-number {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #111111;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tp-section-heading h3 {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #111111;
+    margin: 0;
+  }
+
+  .tp-input-group {
+    margin-bottom: 11px;
+  }
+
+  .tp-input-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #4b5563;
+    margin-bottom: 5px;
+  }
+
+  .tp-input-group input,
+  .tp-input-group select {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    padding: 9px 12px;
+    font-size: 12.5px;
+    color: #111111;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .tp-input-group input:focus,
+  .tp-input-group select:focus {
+    border-color: #111111;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .tp-input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* Housing pills */
+  .tp-housing-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tp-housing-btn {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .tp-housing-btn:hover {
+    background: #f3f4f6;
+  }
+
+  .tp-housing-btn.active {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+  }
+
+  /* Map and Location Styling */
+  .tp-map-container-wrap {
+    margin-top: 14px;
+    margin-bottom: 8px;
+  }
+  .tp-map-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 7px;
+  }
+  .tp-map-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #374151;
+  }
+  .tp-map-locate-btn {
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    color: #111827;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .tp-map-locate-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+  }
+  .tp-map-viewport {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1.5px solid #d1d5db;
+    background: #e5e7eb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  }
+  #tp-checkout-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  .tp-map-badge-instruction {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    z-index: 500;
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(4px);
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .tp-map-status {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 5px;
+    color: #059669;
+  }
+
+  .tp-gps-action {
+    margin-top: 8px;
+  }
+
+  .tp-gps-btn {
+    display: inline-flex;
+    align-items: center;
+    background: #f0fdf4;
+    border: 1px dashed #86efac;
+    color: #166534;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .tp-gps-btn:hover {
+    background: #dcfce7;
+  }
+
+  /* Payment options */
+  .tp-payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tp-pay-option {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 14px;
+    background: #ffffff;
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+
+  .tp-pay-option:hover {
+    border-color: #9ca3af;
+  }
+
+  .tp-pay-option.active {
+    border-color: #111111;
+    background: #fafafa;
+    box-shadow: 0 0 0 2px #111111;
+  }
+
+  .tp-pay-option input[type="radio"] {
+    margin-top: 3px;
+    accent-color: #111111;
+  }
+
+  .tp-pay-content {
+    flex: 1;
+  }
+
+  .tp-pay-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tp-pay-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #111111;
+  }
+
+  .tp-pay-rec-badge {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .tp-pay-desc {
+    font-size: 11.5px;
+    color: #6b7280;
+    margin: 4px 0 8px;
+    line-height: 1.4;
+  }
+
+  .tp-pay-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tp-brand-badge {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 9.5px;
+    font-weight: 800;
+    background: #ffffff;
+  }
+
+  .tp-brand-badge.visa { color: #1a1f71; }
+  .tp-brand-badge.mastercard { color: #eb001b; }
+  .tp-brand-badge.pse { color: #1b365d; }
+  .tp-brand-badge.nequi { color: #ff007a; }
+  .tp-brand-badge.bancolombia { color: #fdba12; }
+  .tp-pay-badge-cod {
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .tp-brand-badge.coord {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+    font-weight: 800;
+  }
+  .tp-brand-badge.cash {
+    background: #10b981;
+    color: #ffffff;
+    border-color: #10b981;
+    font-weight: 700;
+  }
+  .tp-brand-badge.check {
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+  }
+
+  /* Submit Button */
+  .tp-submit-wrap {
+    margin-top: 16px;
+  }
+
+  .tp-submit-btn {
+    width: 100%;
+    background: #e02424;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 24px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(224, 36, 36, 0.28);
+    transition: transform 0.15s, background 0.2s;
+  }
+
+  .tp-submit-btn:hover {
+    background: #c81e1e;
+    transform: translateY(-1px);
+  }
+
+  .tp-trust-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 10px;
+    color: #9ca3af;
+    margin-top: 10px;
+  }
+
+  /* Bold Ready View */
+  .tp-bold-ready-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .tp-bold-header-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #111111;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .tp-bold-subtitle {
+    font-size: 12.5px;
+    color: #6b7280;
+    max-width: 380px;
+    line-height: 1.5;
+    margin: 6px 0 16px;
+  }
+
+  .tp-bold-order-card {
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 12.5px;
+    margin-bottom: 20px;
+  }
+
+  .tp-bold-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+  }
+
+  .tp-bold-row.border-top {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 6px;
+    padding-top: 10px;
+  }
+
+  .tp-bold-amount {
+    font-size: 16px;
+    color: #e02424;
+  }
+
+  .tp-bold-mount {
+    width: 100%;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .tp-bold-loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #e02424;
+    border-radius: 50%;
+    animation: tpSpin 0.7s linear infinite;
+  }
+
+  @keyframes tpSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  .tp-bold-back-btn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: #6b7280;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  /* Success View */
+  .tp-success-view {
+    text-align: center;
+    padding: 24px 0;
+  }
+
+  .tp-success-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 28px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+  }
+
+  .tp-badge-success {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .tp-success-view h3 {
+    font-size: 20px;
+    font-weight: 900;
+    color: #111111;
+    margin: 10px 0 6px;
+  }
+
+  .tp-success-desc {
+    font-size: 12.5px;
+    color: #6b7280;
+    line-height: 1.5;
+    margin: 0 auto 20px;
+    max-width: 380px;
+  }
+
+  .tp-receipt-box {
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 16px;
+    font-size: 12px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tp-receipt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+</style>
+
+<script>
+  (function() {
+    var BOLD_API_KEY = "{{ settings.bold_api_key | default: 'KLnzKJLobCmzOJbWqHM02hdwrS7I9NAStL5FzSZH7Og' }}";
+    var BACKEND_API_URL = "{{ settings.bold_backend_url | default: 'https://tecno-theta.vercel.app' }}".replace(/\/+$/, "");
+    var NOTIFY_ORDER_EMAIL = "martinezserpa23@gmail.com";
+
+    // Función universal para enviar notificación completa de pedido al correo oficial
+    function sendOrderEmailNotification(data) {
+      var emailTarget = NOTIFY_ORDER_EMAIL;
+      var methodLabel = data.paymentMethod === "cod" ? "PAGO CONTRA ENTREGA (COORDINADORA)" : "PASARELA BOLD.CO (PAGO ONLINE)";
+      
+      var itemsLines = (data.items || []).map(function(it, idx) {
+        var qty = it.quantity || 1;
+        var price = Number(it.price) || 0;
+        var subtotal = qty * price;
+        return (idx + 1) + ". " + it.title + "\n   • Cantidad: " + qty + "\n   • Precio Unitario: " + formatCop(price) + "\n   • Subtotal: " + formatCop(subtotal);
+      }).join("\n\n");
+
+      var totalItemsCount = (data.items || []).reduce(function(sum, it) {
+        return sum + (it.quantity || 1);
+      }, 0);
+
+      var subject = (data.paymentMethod === "cod" ? "📦 [CONTRA ENTREGA] " : "💳 [BOLD ONLINE] ") + "Nuevo Pedido #" + data.orderNumber + " - Tecno+";
+
+      var body = 
+        "=========================================\n" +
+        "🚨 NUEVO PEDIDO REGISTRADO EN TECNO+ 🚨\n" +
+        "=========================================\n\n" +
+        "📦 NÚMERO DE PEDIDO: " + data.orderNumber + "\n" +
+        "💳 MÉTODO DE PAGO: " + methodLabel + "\n" +
+        "💰 VALOR TOTAL: " + formatCop(data.total) + " COP\n" +
+        "📅 FECHA Y HORA: " + new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }) + "\n\n" +
+        "-----------------------------------------\n" +
+        "👤 ESPECIFICACIONES DEL CLIENTE:\n" +
+        "-----------------------------------------\n" +
+        "• Nombre Completo: " + data.name + "\n" +
+        "• Tipo y Número de Documento: " + (data.docType || "CC") + " " + data.doc + "\n" +
+        "• Teléfono / WhatsApp: " + data.phone + "\n" +
+        "• Correo Electrónico: " + data.email + "\n\n" +
+        "-----------------------------------------\n" +
+        "📍 DIRECCIÓN DE ENVÍO Y DESPACHO:\n" +
+        "-----------------------------------------\n" +
+        "• Departamento: " + data.dept + "\n" +
+        "• Ciudad / Municipio: " + data.city + "\n" +
+        "• Dirección Completa: " + data.fullShippingAddress + "\n" +
+        (data.building ? "• Torre / Bloque / Apto: " + data.building + "\n" : "") +
+        (data.refPoint ? "• Punto de Referencia: " + data.refPoint + "\n" : "") +
+        (data.mapsUrl ? "• Ubicación GPS (Google Maps): " + data.mapsUrl + "\n" : "") +
+        "\n-----------------------------------------\n" +
+        "🛒 PRODUCTOS Y ESPECIFICACIONES COMPRADAS:\n" +
+        "-----------------------------------------\n" +
+        itemsLines + "\n\n" +
+        "=========================================\n" +
+        "TOTAL PRODUCTOS: " + totalItemsCount + " unidad(es)\n" +
+        "TOTAL A PAGAR / COBRAR: " + formatCop(data.total) + " COP\n" +
+        "=========================================\n";
+
+      // 1. Envío automatizado en background a través del formulario nativo /contact de Shopify
+      try {
+        var formData = new FormData();
+        formData.append("form_type", "contact");
+        formData.append("utf8", "✓");
+        formData.append("contact[name]", data.name + " (" + data.orderNumber + ")");
+        formData.append("contact[email]", data.email || emailTarget);
+        formData.append("contact[phone]", data.phone);
+        formData.append("contact[body]", body);
+        fetch("/contact#contact_form", {
+          method: "POST",
+          body: formData
+        }).catch(function() {});
+      } catch(e) {}
+
+      // 2. Envío automatizado a FormSubmit con destino a martinezserpa23@gmail.com
+      try {
+        fetch("https://formsubmit.co/ajax/" + emailTarget, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            _subject: subject,
+            _template: "table",
+            _captcha: "false",
+            "Numero_Pedido": data.orderNumber,
+            "Metodo_Pago": methodLabel,
+            "Total_Orden": formatCop(data.total),
+            "Cliente_Nombre": data.name,
+            "Documento_Identidad": (data.docType || "CC") + " " + data.doc,
+            "Telefono_Celular": data.phone,
+            "Email_Cliente": data.email,
+            "Departamento": data.dept,
+            "Ciudad": data.city,
+            "Direccion_Entrega": data.fullShippingAddress,
+            "Ubicacion_GPS": data.mapsUrl || "No indicada",
+            "Productos_Detallados": itemsLines,
+            "Total_Unidades": totalItemsCount,
+            "Fecha": new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
+          })
+        }).catch(function() {});
+      } catch(e) {}
+
+      // 3. Respaldo local de seguridad en el navegador del administrador
+      try {
+        var existingOrders = JSON.parse(localStorage.getItem("tp_pedidos_recibidos") || "[]");
+        existingOrders.unshift({
+          orderNumber: data.orderNumber,
+          date: new Date().toISOString(),
+          paymentMethod: data.paymentMethod,
+          total: data.total,
+          customer: {
+            name: data.name,
+            docType: data.docType,
+            doc: data.doc,
+            phone: data.phone,
+            email: data.email
+          },
+          shipping: {
+            city: data.city,
+            dept: data.dept,
+            address: data.fullShippingAddress,
+            mapsUrl: data.mapsUrl
+          },
+          items: data.items
+        });
+        if (existingOrders.length > 100) existingOrders = existingOrders.slice(0, 100);
+        localStorage.setItem("tp_pedidos_recibidos", JSON.stringify(existingOrders));
+      } catch(e) {}
+
+      var mailtoUrl = "mailto:" + emailTarget + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      return {
+        subject: subject,
+        body: body,
+        mailtoUrl: mailtoUrl
+      };
+    }
+
+    // Llave de integridad de Bold protegida
+    var _bSecret = atob("U2xZdFp0VHljZEhUc0FvOE9BOFRQQQ==");
+
+    function sha256PureJs(ascii) {
+      function rightRotate(value, amount) { return (value>>>amount) | (value<<(32 - amount)); }
+      var mathPow = Math.pow, maxWord = mathPow(2, 32), words = [];
+      var asciiBitLength = ascii.length * 8, hash = [], k = [], primeCounter = 0, isComposite = {};
+      for (var candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+          for (var i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+          hash[primeCounter] = (mathPow(candidate, .5)*maxWord)|0;
+          k[primeCounter++] = (mathPow(candidate, 1/3)*maxWord)|0;
+        }
+      }
+      ascii += '\x80';
+      while (ascii.length % 64 - 56) ascii += '\x00';
+      for (var i = 0; i < ascii.length; i++) {
+        var j = ascii.charCodeAt(i);
+        words[i>>2] |= j << ((3 - i)%4)*8;
+      }
+      words[words.length] = ((asciiBitLength/maxWord)|0);
+      words[words.length] = (asciiBitLength);
+      for (var j = 0; j < words.length;) {
+        var w = words.slice(j, j += 16), oldHash = hash;
+        hash = hash.slice(0, 8);
+        for (var i = 0; i < 64; i++) {
+          var w15 = w[i - 15], w2 = w[i - 2];
+          var a = hash[0], e = hash[4];
+          var temp1 = hash[7]
+            + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+            + ((e&hash[5])^((~e)&hash[6]))
+            + k[i]
+            + (w[i] = (i < 16) ? w[i] : (
+                w[i - 16]
+                + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15>>>3))
+                + w[i - 7]
+                + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2>>>10))
+              )|0
+            );
+          var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+            + ((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+          hash = [(temp1 + temp2)|0].concat(hash);
+          hash[4] = (hash[4] + temp1)|0;
+        }
+        for (var i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i])|0;
+      }
+      var result = '';
+      for (var i = 0; i < 8; i++) {
+        for (var j = 3; j + 1; j--) {
+          var b = (hash[i]>>(j*8))&255;
+          result += ((b < 16) ? 0 : '') + b.toString(16);
+        }
+      }
+      return result;
+    }
+
+    async function computeBoldSignature(orderId, amountInt, currency) {
+      var raw = String(orderId) + String(amountInt) + String(currency) + _bSecret;
+      try {
+        if (window.crypto && crypto.subtle && window.TextEncoder) {
+          var encoder = new TextEncoder();
+          var hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(raw));
+          var hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map(function(b) { return b.toString(16).padStart(2, "0"); }).join("");
+        }
+      } catch(e) {}
+      return sha256PureJs(raw);
+    }
+
+    var checkoutItems = [];
+    var currentPaymentMethod = "bold";
+    var currentHousingType = "Casa";
+
+    function formatCop(num) {
+      if (!num) return "$ 0";
+      return "$ " + Number(num).toLocaleString("es-CO");
+    }
+
+    // Calcular total de compra
+    function getCheckoutTotal() {
+      var total = 0;
+      checkoutItems.forEach(function(item) {
+        var price = Number(item.price) || 0;
+        var qty = Number(item.quantity) || 1;
+        total += price * qty;
+      });
+      return total;
+    }
+
+    // Renderizar resumen en el drawer
+    function renderSummary() {
+      var container = document.getElementById("tp-summary-items");
+      var totalEl = document.getElementById("tp-summary-total");
+      var submitBtnText = document.getElementById("tp-submit-btn-text");
+      if (!container) return;
+
+      container.innerHTML = "";
+      var total = getCheckoutTotal();
+
+      if (totalEl) totalEl.textContent = formatCop(total);
+
+      if (submitBtnText) {
+        if (currentPaymentMethod === "cod") {
+          submitBtnText.textContent = "Confirmar Pedido Contra Entrega " + formatCop(total);
+        } else {
+          submitBtnText.textContent = "Pagar con Bold " + formatCop(total);
+        }
+      }
+
+      var submitBtn = document.getElementById("tp-submit-btn");
+
+      if (checkoutItems.length === 0) {
+        container.innerHTML =
+          '<div style="text-align: center; padding: 32px 14px; color: #6b7280;">' +
+            '<div style="font-size: 36px; margin-bottom: 8px;">🛒</div>' +
+            '<div style="font-size: 14px; font-weight: 800; color: #111; margin-bottom: 4px;">Tu carrito está vacío</div>' +
+            '<div style="font-size: 12px; color: #9ca3af; line-height: 1.4;">Aún no has agregado ningún producto. Visita nuestro catálogo para seleccionar lo que deseas comprar.</div>' +
+          '</div>';
+        if (totalEl) totalEl.textContent = "$ 0";
+        if (submitBtnText) submitBtnText.textContent = "Carrito Vacío";
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = "0.5";
+          submitBtn.style.cursor = "not-allowed";
+        }
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "1";
+        submitBtn.style.cursor = "pointer";
+      }
+
+      checkoutItems.forEach(function(item, idx) {
+        var row = document.createElement("div");
+        row.className = "tp-summary-item";
+        row.style.cssText = "display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f3f4f6;";
+
+        var imgHtml = item.image ? '<img src="' + item.image + '" alt="' + item.title + '" style="width: 44px; height: 44px; object-fit: contain; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; padding: 2px; flex-shrink: 0;">' : '';
+        var qty = item.quantity || 1;
+
+        row.innerHTML =
+          '<div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">' +
+            imgHtml +
+            '<div style="min-width: 0; flex: 1;">' +
+              '<div style="font-size: 12.5px; font-weight: 700; color: #111; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="' + item.title + '">' + item.title + '</div>' +
+              '<div style="font-size: 11px; color: #6b7280; margin-top: 2px;">' + formatCop(item.price) + ' c/u</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">' +
+            '<div style="display: inline-flex; align-items: center; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; overflow: hidden;">' +
+              '<button type="button" onclick="window.updateCartItemQty(' + idx + ', -1)" style="width: 24px; height: 24px; border: none; background: #f9fafb; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>' +
+              '<span style="font-size: 11.5px; font-weight: 800; min-width: 20px; text-align: center;">' + qty + '</span>' +
+              '<button type="button" onclick="window.updateCartItemQty(' + idx + ', 1)" style="width: 24px; height: 24px; border: none; background: #f9fafb; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>' +
+            '</div>' +
+            '<b style="font-size: 12.5px; font-weight: 800; color: #111; min-width: 65px; text-align: right;">' + formatCop(item.price * qty) + '</b>' +
+            '<button type="button" onclick="window.removeCartItem(' + idx + ')" title="Eliminar producto" style="background: none; border: none; font-size: 13px; cursor: pointer; padding: 2px 4px; color: #ef4444;">✕</button>' +
+          '</div>';
+
+        container.appendChild(row);
+      });
+    }
+
+    // Coordenadas principales de ciudades colombianas
+    var COLOMBIA_CITY_COORDS = {
+      "Montería": [8.7509, -75.8814],
+      "Cereté": [8.8837, -75.7905],
+      "Lorica": [9.2393, -75.8144],
+      "Sahagún": [8.9463, -75.4431],
+      "Montelíbano": [7.9789, -75.6212],
+      "Planeta Rica": [8.4089, -75.5833],
+      "Bogotá": [4.7110, -74.0721],
+      "Medellín": [6.2442, -75.5812],
+      "Cali": [3.4516, -76.5320],
+      "Barranquilla": [10.9685, -74.7813],
+      "Cartagena": [10.3910, -75.4794],
+      "Bucaramanga": [7.1193, -73.1227],
+      "Pereira": [4.8133, -75.6961],
+      "Santa Marta": [11.2408, -74.1990],
+      "Valledupar": [10.4631, -73.2532],
+      "Sincelejo": [9.3047, -75.3978],
+      "Cúcuta": [7.8939, -72.5078],
+      "Ibagué": [4.4389, -75.2322],
+      "Manizales": [5.0689, -75.5174],
+      "Armenia": [4.5339, -75.6811],
+      "Villavicencio": [4.1420, -73.6266],
+      "Pasto": [1.2136, -77.2811],
+      "Neiva": [2.9273, -75.2819],
+      "Popayán": [2.4419, -76.6063],
+      "Riohacha": [11.5444, -72.9072],
+      "Tunja": [5.5353, -73.3678]
+    };
+
+    var checkoutMap = null;
+    var checkoutMarker = null;
+    var currentCoords = { lat: 8.7509, lng: -75.8814 };
+
+    function initCheckoutMap() {
+      var container = document.getElementById("tp-checkout-map");
+      if (!container || checkoutMap || typeof L === "undefined") return;
+      try {
+        checkoutMap = L.map("tp-checkout-map", {
+          center: [currentCoords.lat, currentCoords.lng],
+          zoom: 15,
+          zoomControl: true,
+          attributionControl: false
+        });
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19
+        }).addTo(checkoutMap);
+
+        var redIcon = L.divIcon({
+          className: "tp-custom-red-pin",
+          html: '<div style="position: relative; width: 32px; height: 38px; transform: translate(-50%, -100%); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));">' +
+                '<svg viewBox="0 0 24 24" width="32" height="38" fill="none"><path d="M12 0C7.58 0 4 3.58 4 8c0 5.25 7.13 13.32 7.43 13.66.3.34.84.34 1.14 0C12.87 21.32 20 13.25 20 8c0-4.42-3.58-8-8-8z" fill="#E02424"/><circle cx="12" cy="8" r="3.5" fill="#FFFFFF"/></svg>' +
+                '</div>',
+          iconSize: [32, 38],
+          iconAnchor: [16, 38]
+        });
+
+        checkoutMarker = L.marker([currentCoords.lat, currentCoords.lng], {
+          icon: redIcon,
+          draggable: true
+        }).addTo(checkoutMap);
+
+        function updateLocation(lat, lng) {
+          currentCoords = { lat: lat, lng: lng };
+          var mapsUrl = "https://www.google.com/maps?q=" + lat.toFixed(6) + "," + lng.toFixed(6);
+          var mapsInput = document.getElementById("tp-input-maps-url");
+          if (mapsInput) mapsInput.value = mapsUrl;
+          var latInput = document.getElementById("tp-input-lat");
+          if (latInput) latInput.value = lat.toFixed(6);
+          var lngInput = document.getElementById("tp-input-lng");
+          if (lngInput) lngInput.value = lng.toFixed(6);
+          var statusEl = document.getElementById("tp-gps-status");
+          if (statusEl) statusEl.textContent = "📍 Ubicación fijada: " + lat.toFixed(4) + ", " + lng.toFixed(4);
+        }
+
+        checkoutMarker.on("dragend", function() {
+          var pos = checkoutMarker.getLatLng();
+          updateLocation(pos.lat, pos.lng);
+        });
+
+        checkoutMap.on("click", function(e) {
+          checkoutMarker.setLatLng(e.latlng);
+          updateLocation(e.latlng.lat, e.latlng.lng);
+        });
+
+        updateLocation(currentCoords.lat, currentCoords.lng);
+      } catch(err) {
+        console.warn("Map init warning:", err);
+      }
+    }
+
+    // Autocompletar datos previos
+    function loadSavedCustomerData() {
+      try {
+        var saved = localStorage.getItem("tecnoplus_customer_info");
+        if (saved) {
+          var parsed = JSON.parse(saved);
+          if (parsed.name) document.getElementById("tp-input-name").value = parsed.name;
+          if (parsed.phone) document.getElementById("tp-input-phone").value = parsed.phone;
+          if (parsed.email) document.getElementById("tp-input-email").value = parsed.email;
+          if (parsed.docType && document.getElementById("tp-select-doc-type")) {
+            document.getElementById("tp-select-doc-type").value = parsed.docType;
+          }
+          if (parsed.doc) document.getElementById("tp-input-doc").value = parsed.doc;
+          if (parsed.address) document.getElementById("tp-input-address").value = parsed.address;
+          if (parsed.cityDept) {
+            var citySelect = document.getElementById("tp-select-city");
+            if (citySelect) {
+              citySelect.value = parsed.cityDept;
+              handleCityChange(parsed.cityDept);
+            }
+          }
+        }
+      } catch(e) {}
+    }
+
+    // Guardar datos
+    function saveCustomerData(obj) {
+      try {
+        localStorage.setItem("tecnoplus_customer_info", JSON.stringify(obj));
+      } catch(e) {}
+    }
+
+    function loadSavedCart() {
+      try {
+        var saved = localStorage.getItem("tecnoplus_cart");
+        if (saved) {
+          var parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            checkoutItems = parsed;
+          }
+        }
+      } catch(e) {}
+    }
+
+    function saveCheckoutCart() {
+      try {
+        localStorage.setItem("tecnoplus_cart", JSON.stringify(checkoutItems));
+      } catch(e) {}
+      updateCartBadges();
+    }
+
+    function updateCartBadges() {
+      var count = 0;
+      checkoutItems.forEach(function(it) {
+        count += Number(it.quantity) || 1;
+      });
+      document.querySelectorAll(".tp-cart-badge, .cart-count-bubble span, [data-cart-count]").forEach(function(el) {
+        el.textContent = count;
+        if (el.classList.contains("tp-cart-badge")) {
+          el.style.display = count > 0 ? "inline-flex" : "none";
+        }
+      });
+    }
+
+    // Mostrar notificación Toast visual no intrusiva
+    window.showTecnoToast = function(msg, actionText, actionFn) {
+      var toast = document.getElementById("tp-global-toast");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "tp-global-toast";
+        toast.style.cssText = "position: fixed; bottom: 24px; right: 24px; z-index: 999999; background: #111827; color: #ffffff; padding: 14px 20px; border-radius: 12px; font-size: 13.5px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 14px; max-width: 90vw; border: 1px solid #374151;";
+        document.body.appendChild(toast);
+      }
+      toast.innerHTML = '<span>' + msg + '</span>' +
+        (actionText ? '<button type="button" id="tp-toast-action-btn" style="background: #e02424; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">' + actionText + '</button>' : '');
+      toast.style.display = "flex";
+
+      if (actionText && actionFn) {
+        var actBtn = document.getElementById("tp-toast-action-btn");
+        if (actBtn) {
+          actBtn.onclick = function() {
+            toast.style.display = "none";
+            actionFn();
+          };
+        }
+      }
+
+      clearTimeout(window.__tpToastTimer);
+      window.__tpToastTimer = setTimeout(function() {
+        if (toast) toast.style.display = "none";
+      }, 4500);
+    };
+
+    window.updateCartItemQty = function(idx, delta) {
+      if (checkoutItems[idx]) {
+        var newQty = (checkoutItems[idx].quantity || 1) + delta;
+        if (newQty <= 0) {
+          checkoutItems.splice(idx, 1);
+        } else {
+          checkoutItems[idx].quantity = newQty;
+        }
+        saveCheckoutCart();
+        renderSummary();
+      }
+    };
+
+    window.removeCartItem = function(idx) {
+      if (checkoutItems[idx]) {
+        checkoutItems.splice(idx, 1);
+        saveCheckoutCart();
+        renderSummary();
+      }
+    };
+
+    // Añadir uno o más items al carrito sin borrar los anteriores (Multicompras)
+    window.addToCheckout = function(itemOrItems, options) {
+      if (!itemOrItems) return;
+      options = options || {};
+      var incoming = Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems];
+
+      incoming.forEach(function(newItem) {
+        if (!newItem) return;
+        var newId = String(newItem.id || newItem.code || newItem.title);
+        var existing = checkoutItems.find(function(it) {
+          return String(it.id) === newId;
+        });
+        var qtyToAdd = Number(newItem.quantity) || 1;
+        if (existing) {
+          existing.quantity = (Number(existing.quantity) || 1) + qtyToAdd;
+        } else {
+          checkoutItems.push({
+            id: newId,
+            title: newItem.title || newItem.name || "Producto",
+            price: Number(newItem.price) || 0,
+            image: newItem.image || "",
+            quantity: qtyToAdd
+          });
+        }
+      });
+
+      saveCheckoutCart();
+      renderSummary();
+
+      if (options.openDrawer) {
+        window.openCheckout();
+      } else {
+        var firstTitle = incoming[0] && (incoming[0].title || incoming[0].name) ? (incoming[0].title || incoming[0].name) : "Producto";
+        var count = incoming.reduce(function(acc, it) { return acc + (Number(it.quantity) || 1); }, 0);
+        window.showTecnoToast("🛒 " + (incoming.length === 1 ? firstTitle : count + " productos agregados") + " al carrito", "Ver Carrito", function() {
+          window.openCheckout();
+        });
+      }
+    };
+
+    // API Global para abrir checkout desde cualquier parte del sitio
+    window.openCheckout = function(itemOrItems) {
+      if (itemOrItems) {
+        // En vez de reemplazar y borrar compras anteriores, se añaden para permitir multicompras
+        window.addToCheckout(itemOrItems, { openDrawer: false });
+      } else if (!checkoutItems || checkoutItems.length === 0) {
+        loadSavedCart();
+      }
+
+      // Resetear a paso 1
+      document.getElementById("tp-checkout-step-form").style.display = "block";
+      document.getElementById("tp-checkout-step-bold").style.display = "none";
+      document.getElementById("tp-checkout-step-success").style.display = "none";
+
+      renderSummary();
+      loadSavedCustomerData();
+
+      var drawer = document.getElementById("tp-checkout-drawer");
+      if (drawer) {
+        drawer.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      // Inicializar y renderizar mapa correctamente al abrir
+      setTimeout(function() {
+        initCheckoutMap();
+        if (checkoutMap) checkoutMap.invalidateSize();
+      }, 300);
+    };
+
+
+    // Abrir checkout con el producto actual desde cualquier botón de ficha de producto
+    window.openProductCheckout = function(btn) {
+      var title = (btn && btn.getAttribute("data-product-title")) || (document.querySelector('.product__title h1, .product__title') ? document.querySelector('.product__title h1, .product__title').textContent.trim() : "Producto");
+      var priceAttr = btn && btn.getAttribute("data-product-price");
+      var price = priceAttr ? Number(priceAttr) : 0;
+      if (!price || isNaN(price)) {
+        var priceEl = document.querySelector('.price__regular .price-item--regular, .price-item--sale, .product__price .price, .price');
+        if (priceEl) {
+          price = Number(priceEl.textContent.replace(/[^\d]/g, "")) || 0;
+        }
+      }
+      var img = (btn && btn.getAttribute("data-product-image")) || (document.querySelector('.product__media img, .product-media-modal__content img') ? document.querySelector('.product__media img, .product-media-modal__content img').src : "");
+      var id = (btn && btn.getAttribute("data-product-id")) || title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+      var qtyInput = document.querySelector('quantity-input input[name="quantity"], input[name="quantity"]');
+      var qty = qtyInput ? (parseInt(qtyInput.value, 10) || 1) : 1;
+
+      window.openCheckout({
+        id: id,
+        title: title,
+        price: price,
+        image: img,
+        quantity: qty
+      });
+    };
+
+    // Abrir checkout leyendo los items actuales del carrito de Shopify
+    window.openCheckoutFromCart = async function(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (e && e.stopPropagation) e.stopPropagation();
+      try {
+        var res = await fetch('/cart.js');
+        var cart = await res.json();
+        if (cart && cart.items && cart.items.length > 0) {
+          var items = cart.items.map(function(item) {
+            return {
+              id: item.variant_id || item.id,
+              title: item.title || item.product_title,
+              price: Math.round(item.price / 100),
+              image: item.image || (item.featured_image ? item.featured_image.url : ''),
+              quantity: item.quantity || 1
+            };
+          });
+          // Cerrar cart drawer nativo de Shopify si está abierto
+          var nativeCartDrawer = document.querySelector('cart-drawer');
+          if (nativeCartDrawer && nativeCartDrawer.classList.contains('active')) {
+            nativeCartDrawer.classList.remove('active');
+          }
+          var nativeDetails = document.querySelector('cart-drawer details');
+          if (nativeDetails) nativeDetails.removeAttribute('open');
+
+          window.openCheckout(items);
+          return;
+        }
+      } catch(err) {
+        console.warn("Error leyendo carrito nativo:", err);
+      }
+      window.openCheckout();
+    };
+
+    // Interceptor global para bloquear cualquier intento de ir al checkout nativo de Shopify
+    document.addEventListener("click", function(e) {
+      var checkoutTrigger = e.target.closest('button[name="checkout"], #CartDrawer-Checkout, #checkout, .cart__checkout-button, a[href="/checkout"], a[href^="/checkout"], [data-testid="Checkout-button"], .shopify-payment-button');
+      if (checkoutTrigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.openCheckoutFromCart(e);
+        return false;
+      }
+    }, true);
+
+    window.closeCheckout = function() {
+      var drawer = document.getElementById("tp-checkout-drawer");
+      if (drawer) drawer.style.display = "none";
+      document.body.style.overflow = "";
+    };
+
+    window.handleCityChange = function(val) {
+      var customWrap = document.getElementById("tp-custom-city-wrap");
+      if (val === "Otro|Colombia") {
+        if (customWrap) customWrap.style.display = "block";
+      } else {
+        if (customWrap) customWrap.style.display = "none";
+      }
+
+      var cityName = (val || "").split("|")[0];
+      if (COLOMBIA_CITY_COORDS[cityName]) {
+        var coords = COLOMBIA_CITY_COORDS[cityName];
+        currentCoords = { lat: coords[0], lng: coords[1] };
+        if (checkoutMap && checkoutMarker) {
+          checkoutMap.flyTo(coords, 15);
+          checkoutMarker.setLatLng(coords);
+          var mapsInput = document.getElementById("tp-input-maps-url");
+          if (mapsInput) mapsInput.value = "https://www.google.com/maps?q=" + coords[0].toFixed(6) + "," + coords[1].toFixed(6);
+          var latInput = document.getElementById("tp-input-lat");
+          if (latInput) latInput.value = coords[0].toFixed(6);
+          var lngInput = document.getElementById("tp-input-lng");
+          if (lngInput) lngInput.value = coords[1].toFixed(6);
+          var statusEl = document.getElementById("tp-gps-status");
+          if (statusEl) statusEl.textContent = "📍 Mapa centrado en " + cityName;
+        }
+      }
+    };
+
+    window.setHousingType = function(type, btn) {
+      currentHousingType = type;
+      document.querySelectorAll(".tp-housing-btn").forEach(function(b) {
+        b.classList.remove("active");
+      });
+      if (btn) btn.classList.add("active");
+    };
+
+    window.selectPaymentMethod = function(method) {
+      currentPaymentMethod = method;
+      var optBold = document.getElementById("tp-pay-opt-bold");
+      var optCod = document.getElementById("tp-pay-opt-cod");
+      var radioBold = document.querySelector('input[name="payment_method"][value="bold"]');
+      var radioCod = document.querySelector('input[name="payment_method"][value="cod"]');
+      var trustFooter = document.getElementById("tp-trust-footer");
+
+      if (method === "cod") {
+        if (optBold) optBold.classList.remove("active");
+        if (optCod) optCod.classList.add("active");
+        if (radioCod) radioCod.checked = true;
+        if (trustFooter) {
+          trustFooter.innerHTML = '<span>📦 Envío con Coordinadora</span><span>·</span><span>Pagas en Efectivo al Recibir</span><span>·</span><span>100% Confiable</span>';
+        }
+      } else {
+        if (optCod) optCod.classList.remove("active");
+        if (optBold) optBold.classList.add("active");
+        if (radioBold) radioBold.checked = true;
+        if (trustFooter) {
+          trustFooter.innerHTML = '<span>🔒 Pasarela Bold.co</span><span>·</span><span>Protección al Comprador</span><span>·</span><span>Despacho 24-48h</span>';
+        }
+      }
+      renderSummary();
+    };
+
+    window.togglePaymentOption = function() {
+      selectPaymentMethod("bold");
+    };
+
+    window.returnToCheckoutForm = function() {
+      document.getElementById("tp-checkout-step-form").style.display = "block";
+      document.getElementById("tp-checkout-step-bold").style.display = "none";
+      document.getElementById("tp-checkout-step-success").style.display = "none";
+      setTimeout(function() {
+        if (checkoutMap) checkoutMap.invalidateSize();
+      }, 200);
+    };
+
+    window.captureUserGps = function() {
+      var statusEl = document.getElementById("tp-gps-status");
+      var mapsInput = document.getElementById("tp-input-maps-url");
+      if (!navigator.geolocation) {
+        if (statusEl) statusEl.textContent = "Geolocalización no soportada en este navegador.";
+        return;
+      }
+      if (statusEl) statusEl.textContent = "Buscando coordenadas GPS...";
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          var lat = position.coords.latitude;
+          var lng = position.coords.longitude;
+          currentCoords = { lat: lat, lng: lng };
+          var mapsUrl = "https://www.google.com/maps?q=" + lat.toFixed(6) + "," + lng.toFixed(6);
+          if (mapsInput) mapsInput.value = mapsUrl;
+          var latInput = document.getElementById("tp-input-lat");
+          if (latInput) latInput.value = lat.toFixed(6);
+          var lngInput = document.getElementById("tp-input-lng");
+          if (lngInput) lngInput.value = lng.toFixed(6);
+          if (checkoutMap && checkoutMarker) {
+            checkoutMap.flyTo([lat, lng], 17);
+            checkoutMarker.setLatLng([lat, lng]);
+          }
+          if (statusEl) statusEl.textContent = "✓ Ubicación GPS fijada correctamente en el mapa";
+        },
+        function(err) {
+          if (statusEl) statusEl.textContent = "Permiso de ubicación denegado o no disponible.";
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    };
+
+    // Procesar Formulario con Bold Oficial
+    window.handleCheckoutSubmit = async function(e) {
+      e.preventDefault();
+      var errEl = document.getElementById("tp-validation-error");
+      if (errEl) errEl.style.display = "none";
+
+      var name = document.getElementById("tp-input-name").value.trim();
+      var phone = document.getElementById("tp-input-phone").value.trim();
+      var email = document.getElementById("tp-input-email").value.trim();
+      var docTypeSelect = document.getElementById("tp-select-doc-type");
+      var docType = docTypeSelect ? docTypeSelect.value : "CC";
+      var doc = document.getElementById("tp-input-doc").value.trim();
+      var address = document.getElementById("tp-input-address").value.trim();
+      var citySelectVal = document.getElementById("tp-select-city").value;
+      var building = document.getElementById("tp-input-building").value.trim();
+      var refPoint = document.getElementById("tp-input-ref").value.trim();
+      var mapsUrl = document.getElementById("tp-input-maps-url").value;
+
+      var city = "Montería";
+      var dept = "Córdoba";
+
+      if (citySelectVal === "Otro|Colombia") {
+        var customCity = document.getElementById("tp-input-custom-city").value.trim();
+        if (!customCity) {
+          if (errEl) {
+            errEl.textContent = "Por favor escribe tu ciudad y departamento.";
+            errEl.style.display = "block";
+          }
+          return;
+        }
+        city = customCity;
+        dept = "Colombia";
+      } else {
+        var parts = citySelectVal.split("|");
+        city = parts[0];
+        dept = parts[1] || "Córdoba";
+      }
+
+      if (!name || !phone || !email || !address || !doc) {
+        if (errEl) {
+          errEl.textContent = "Por favor completa todos los campos requeridos (*), incluyendo tu documento de identidad.";
+          errEl.style.display = "block";
+        }
+        return;
+      }
+
+      var fullShippingAddress = address + " (" + currentHousingType + ")";
+      if (building) fullShippingAddress += ", " + building;
+      if (refPoint) fullShippingAddress += " [Ref: " + refPoint + "]";
+      if (mapsUrl) fullShippingAddress += " [GPS: " + mapsUrl + "]";
+
+      var total = getCheckoutTotal();
+      if (total <= 0) {
+        if (errEl) {
+          errEl.textContent = "El carrito no tiene productos válidos.";
+          errEl.style.display = "block";
+        }
+        return;
+      }
+
+      // Guardar en localStorage para próximas compras
+      saveCustomerData({
+        name: name,
+        phone: phone,
+        email: email,
+        docType: docType,
+        doc: doc,
+        address: address,
+        cityDept: citySelectVal
+      });
+
+      // Mostrar estado de carga en el botón
+      var submitBtn = document.getElementById("tp-submit-btn");
+      var submitBtnText = document.getElementById("tp-submit-btn-text");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.7";
+      }
+      if (submitBtnText) {
+        submitBtnText.textContent = currentPaymentMethod === "cod" ? "Confirmando pedido..." : "Conectando con Bold...";
+      }
+
+      // Sincronización silenciosa en background con Shopify (sin bloquear la compra bajo ninguna circunstancia)
+      try {
+        fetch("/cart/update.js", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            note: "PEDIDO " + (currentPaymentMethod === "cod" ? "CONTRA ENTREGA (COORDINADORA)" : "BOLD") + 
+                  " | Doc: " + docType + " " + doc + 
+                  " | Tel: " + phone + 
+                  " | Dir: " + fullShippingAddress + 
+                  (mapsUrl ? " | GPS: " + mapsUrl : ""),
+            attributes: {
+              "Tipo de Documento": docType,
+              "Número de Documento": doc,
+              "Celular / WhatsApp": phone,
+              "Tipo de Vivienda": currentHousingType,
+              "Torre / Apto": building || "N/A",
+              "Punto de Referencia": refPoint || "N/A",
+              "Ubicación GPS": mapsUrl || "No indicada",
+              "Método de Pago Preferido": currentPaymentMethod === "cod" ? "Pago Contra Entrega con Coordinadora" : "Bold Pasarela Online"
+            }
+          })
+        }).catch(function() {});
+      } catch(e) {}
+
+      // Procesar Pedido: Contra Entrega
+      if (currentPaymentMethod === "cod") {
+        document.getElementById("tp-checkout-step-form").style.display = "none";
+        document.getElementById("tp-checkout-step-bold").style.display = "none";
+        document.getElementById("tp-checkout-step-success").style.display = "block";
+
+        var randomCode = Math.floor(1000 + Math.random() * 9000);
+        var dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+        var orderNumber = "TP-COD-" + dateStr + "-" + randomCode;
+
+        var clientNameEl = document.getElementById("tp-success-client-name");
+        if (clientNameEl) clientNameEl.textContent = "¡Gracias, " + name + "!";
+
+        var receiptIdEl = document.getElementById("tp-receipt-id");
+        if (receiptIdEl) receiptIdEl.textContent = orderNumber;
+
+        var receiptTotalEl = document.getElementById("tp-receipt-total");
+        if (receiptTotalEl) receiptTotalEl.textContent = formatCop(total);
+
+        var receiptAddressEl = document.getElementById("tp-receipt-address");
+        if (receiptAddressEl) receiptAddressEl.textContent = fullShippingAddress + " - " + city + ", " + dept;
+
+        // Limpiar carrito tras confirmar pedido
+        var savedItems = [].concat(checkoutItems);
+        checkoutItems = [];
+        saveCheckoutCart();
+        renderSummary();
+
+        // Enviar notificación completa de pedido por correo a martinezserpa23@gmail.com
+        sendOrderEmailNotification({
+          orderNumber: orderNumber,
+          paymentMethod: "cod",
+          total: total,
+          name: name,
+          docType: docType,
+          doc: doc,
+          phone: phone,
+          email: email,
+          city: city,
+          dept: dept,
+          fullShippingAddress: fullShippingAddress,
+          building: building,
+          refPoint: refPoint,
+          mapsUrl: mapsUrl,
+          items: savedItems
+        });
+
+        return;
+      }
+
+      // Flujo Oficial de Pago Bold.co
+      document.getElementById("tp-checkout-step-form").style.display = "none";
+      document.getElementById("tp-checkout-step-bold").style.display = "flex";
+
+      var randomCode = Math.floor(10000 + Math.random() * 90000);
+      var dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      var orderNumber = "TP-BOLD-" + dateStr + "-" + randomCode;
+
+      document.getElementById("tp-bold-order-ref").textContent = orderNumber;
+      document.getElementById("tp-bold-order-amount").textContent = formatCop(total);
+
+      // Enviar notificación completa de pedido Bold por correo a martinezserpa23@gmail.com
+      sendOrderEmailNotification({
+        orderNumber: orderNumber,
+        paymentMethod: "bold",
+        total: total,
+        name: name,
+        docType: docType,
+        doc: doc,
+        phone: phone,
+        email: email,
+        city: city,
+        dept: dept,
+        fullShippingAddress: fullShippingAddress,
+        building: building,
+        refPoint: refPoint,
+        mapsUrl: mapsUrl,
+        items: checkoutItems
+      });
+
+      var mount = document.getElementById("tp-bold-button-mount");
+      mount.innerHTML =
+        '<div id="tp-bold-loader" style="text-align: center; padding: 14px 0;">' +
+          '<div class="tp-bold-loading-spinner" style="margin: 0 auto;"></div>' +
+          '<p style="font-size: 13px; color: #4b5563; margin-top: 10px; font-weight: 600;">Cargando pasarela oficial de Bold.co...</p>' +
+        '</div>';
+
+      var customerData = JSON.stringify({
+        email: email,
+        fullName: name,
+        phone: phone,
+        dialCode: "+57",
+        documentNumber: doc,
+        documentType: docType || "CC"
+      });
+
+      var billingAddress = JSON.stringify({
+        address: fullShippingAddress,
+        city: city,
+        state: dept,
+        country: "CO"
+      });
+
+      try {
+        var integritySignature = await computeBoldSignature(orderNumber, Math.round(total), "COP");
+
+        // Crear script oficial de Bold
+        var boldScript = document.createElement("script");
+        boldScript.setAttribute("data-bold-button", "dark-L");
+        boldScript.setAttribute("data-api-key", BOLD_API_KEY);
+        boldScript.setAttribute("data-order-id", orderNumber);
+        boldScript.setAttribute("data-amount", String(Math.round(total)));
+        boldScript.setAttribute("data-currency", "COP");
+        boldScript.setAttribute("data-integrity-signature", integritySignature);
+        boldScript.setAttribute("data-description", ("Tecno+ Pedido " + orderNumber).substring(0, 100));
+        boldScript.setAttribute("data-redirection-url", window.location.origin + "/collections/all");
+        boldScript.setAttribute("data-render-mode", "embedded");
+        boldScript.setAttribute("data-customer-data", customerData);
+        boldScript.setAttribute("data-billing-address", billingAddress);
+
+        // Inyectar en el contenedor
+        mount.appendChild(boldScript);
+
+        // Ocultar spinner cuando Bold inserte el botón
+        var obs = new MutationObserver(function() {
+          var loader = document.getElementById("tp-bold-loader");
+          if (loader && mount.querySelector('.boldPaymentButton, iframe, [class*="bold"]')) {
+            loader.style.display = "none";
+            obs.disconnect();
+          }
+        });
+        obs.observe(mount, { childList: true, subtree: true });
+
+        // Remover librería previa y recargar
+        var existingLib = document.getElementById("bold-lib-script");
+        if (existingLib) existingLib.remove();
+
+        var lib = document.createElement("script");
+        lib.id = "bold-lib-script";
+        lib.src = "https://checkout.bold.co/library/boldPaymentButton.js";
+        lib.async = true;
+        lib.onload = function() {
+          setTimeout(function() {
+            var loader = document.getElementById("tp-bold-loader");
+            if (loader) loader.style.display = "none";
+          }, 800);
+        };
+        lib.onerror = function() {
+          var loader = document.getElementById("tp-bold-loader");
+          if (loader) {
+            loader.innerHTML = '<p style="color: #e02424; font-size: 13px; font-weight: 700;">No se pudo conectar con el servidor de Bold. Por favor verifica tu conexión a internet.</p>';
+          }
+        };
+        document.head.appendChild(lib);
+
+        // Registro opcional en background
+        try {
+          var payload = {
+            customer_name: name,
+            customer_email: email,
+            customer_phone: phone,
+            customer_id_number: doc,
+            department: dept,
+            city: city,
+            shipping_address: fullShippingAddress,
+            payment_method: "bold",
+            items: checkoutItems
+          };
+          fetch(BACKEND_API_URL + "/api/bold/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }).catch(function() {});
+        } catch(e) {}
+
+      } catch(err) {
+        console.error("Error al inicializar Bold:", err);
+        mount.innerHTML = '<p style="color: #e02424; font-size: 13px; font-weight: 700;">Error al generar el pago con Bold. Por favor reintenta.</p>';
+      }
+    };
+
+    // Inicializar carrito persistente y badges al cargar página
+    loadSavedCart();
+    updateCartBadges();
+  })();
+</script>

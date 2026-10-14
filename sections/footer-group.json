@@ -1,0 +1,13 @@
+{
+  "name": "t:sections.footer.name",
+  "type": "footer",
+  "sections": {
+    "tecno-footer": {
+      "type": "tecno-footer",
+      "settings": {}
+    }
+  },
+  "order": [
+    "tecno-footer"
+  ]
+}

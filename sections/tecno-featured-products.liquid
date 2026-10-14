@@ -1,0 +1,125 @@
+{%- comment -%}
+  Tecno+ Dispositivos Destacados (Featured Products Section)
+{%- endcomment -%}
+
+<section id="celulares" class="tp-section">
+  <div class="tp-container">
+    <div class="tp-head">
+      <div>
+        <h2>{{ section.settings.title | default: 'Dispositivos destacados' }}</h2>
+      </div>
+      <p>
+        {{ section.settings.description | default: 'Equipos nuevos y listos para acompañarte todos los días. Compra 100% segura con tarjeta, PSE o transferencia.' }}
+      </p>
+    </div>
+
+    <div class="tp-grid">
+      {%- assign featured_collection = section.settings.collection -%}
+      {%- if featured_collection != blank and featured_collection.products_count > 0 -%}
+        {%- for product in featured_collection.products limit: section.settings.products_to_show -%}
+          {% render 'tecno-product-card', product: product, button_theme: section.settings.button_theme %}
+        {%- endfor -%}
+      {%- else -%}
+        {%- comment -%} 4 Default Mock Products matching screenshot {%- endcomment -%}
+        {% render 'tecno-product-card',
+          mock_title: 'iPhone 17 Pro Max',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/iphone17promax.webp?v=1791928268',
+          mock_badge: 'TOP VENTAS',
+          mock_specs: '256GB · Chip A19 Pro',
+          mock_price: '$ 4.500.000',
+          mock_compare: '$ 5.200.000',
+          mock_url: '/collections/all',
+          button_theme: section.settings.button_theme
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'iPhone 16 Pro Max',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone16promax.webp?v=1791928266',
+          mock_badge: 'SEMINUEVO',
+          mock_specs: '256GB · Chip A18 Pro · Seminuevo',
+          mock_price: '$ 2.990.000',
+          mock_compare: '$ 3.490.000',
+          mock_url: '/collections/all',
+          button_theme: section.settings.button_theme
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'Lenovo IdeaPad Slim 3 15IRH10',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/lenovo.png?v=1791928275',
+          mock_badge: 'PANTALLA TÁCTIL',
+          mock_specs: '15.3" WUXGA Táctil · Core i5-13420H · 16GB RAM · 512GB SSD',
+          mock_price: '$ 2.490.000',
+          mock_compare: '$ 3.190.000',
+          mock_url: '/collections/all',
+          button_theme: section.settings.button_theme
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'Samsung Galaxy S26 Ultra',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/samsung_s24_ultra.png?v=1791928269',
+          mock_badge: 'GALAXY AI',
+          mock_specs: '256GB + 12GB RAM · Galaxy AI · S-Pen',
+          mock_price: '$ 3.450.000',
+          mock_compare: '$ 4.190.000',
+          mock_url: '/collections/all',
+          button_theme: section.settings.button_theme
+        %}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Tecno+ Destacados",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Dispositivos destacados"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Descripción",
+      "default": "Equipos nuevos y listos para acompañarte todos los días. Compra 100% segura con tarjeta, PSE o transferencia."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Colección de Shopify (opcional)"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 4,
+      "label": "Cantidad de productos a mostrar"
+    },
+    {
+      "type": "select",
+      "id": "button_theme",
+      "label": "Color del botón",
+      "options": [
+        {
+          "value": "red",
+          "label": "Rojo"
+        },
+        {
+          "value": "black",
+          "label": "Negro"
+        }
+      ],
+      "default": "red"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tecno+ Destacados"
+    }
+  ]
+}
+{% endschema %}

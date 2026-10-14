@@ -1,0 +1,209 @@
+{%- comment -%}
+  Tecno+ Catálogo Preview (Pequeños upgrades. Gran diferencia.)
+{%- endcomment -%}
+
+<section id="gadgets" class="tp-section">
+  <div class="tp-container">
+    <div class="tp-head">
+      <div>
+        {%- if section.settings.eyebrow != blank -%}
+          <span class="tp-eyebrow" style="color: #e02424;">{{ section.settings.eyebrow }}</span>
+        {%- endif -%}
+        <h2>{{ section.settings.title | default: 'Catálogo' }}</h2>
+      </div>
+      <p>
+        {{ section.settings.description | default: 'Computadores, teléfonos, audio y tecnología de alto nivel para hacer tu día más cómodo y productivo.' }}
+      </p>
+    </div>
+
+    <div class="tp-grid">
+      {%- assign catalog_collection = section.settings.collection -%}
+      {%- if catalog_collection != blank and catalog_collection.products_count > 0 -%}
+        {%- for product in catalog_collection.products limit: section.settings.products_to_show -%}
+          {% render 'tecno-product-card', product: product, button_theme: 'black' %}
+        {%- endfor -%}
+      {%- else -%}
+        {%- comment -%} Row 1 {%- endcomment -%}
+        {% render 'tecno-product-card',
+          mock_title: 'Redmi Note 15 Pro',
+          mock_image: 'https://http2.mlstatic.com/D_NQ_NP_2X_617988-MLA107565433120_032026-F.webp',
+          mock_badge: '200MP',
+          mock_specs: '256GB + 12GB RAM · Cámara 200MP',
+          mock_price: '$ 1.250.000',
+          mock_compare: '$ 1.350.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'Lenovo IdeaPad Slim 3 15IRH10',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/lenovo.png?v=1791928275',
+          mock_badge: 'PANTALLA TÁCTIL',
+          mock_specs: '15.3" WUXGA Táctil · Core i5-13420H · 16GB RAM · 512GB SSD',
+          mock_price: '$ 2.490.000',
+          mock_compare: '$ 3.190.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'iPhone 16 Pro Max',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone16promax.webp?v=1791928266',
+          mock_badge: 'SEMINUEVO',
+          mock_specs: '256GB · Chip A18 Pro · Seminuevo',
+          mock_price: '$ 2.990.000',
+          mock_compare: '$ 3.490.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'Redmi Note 15 Pro 256GB',
+          mock_image: 'https://http2.mlstatic.com/D_NQ_NP_2X_617988-MLA107565433120_032026-F.webp',
+          mock_badge: 'NUEVO 2026',
+          mock_specs: '256GB · 12GB RAM · Cámara 200MP · 5G',
+          mock_price: '$ 1.250.000',
+          mock_compare: '$ 1.450.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {%- comment -%} Row 2 {%- endcomment -%}
+        {% render 'tecno-product-card',
+          mock_title: 'Smartwatch Ultra Titanium',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/apple_watch_ultra.jpg?v=1791928270',
+          mock_badge: 'TITANIO',
+          mock_specs: 'Pantalla AMOLED · Llamadas Bluetooth · Sumergible IP68',
+          mock_price: '$ 130.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'Parlante SoundPulse RGB',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/parlante_rgb.png?v=1791928275',
+          mock_badge: 'TOP SONIDO',
+          mock_specs: 'Sonido 360° · Luces dinámicas LED · Batería 12h',
+          mock_price: '$ 95.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'Smartwatch Elegance Pro',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/redmi_watch5.webp?v=1791928268',
+          mock_badge: 'TECNOLOGÍA',
+          mock_specs: 'Medición cardíaca · Notificaciones · Batería 7 días',
+          mock_price: '$ 145.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'TV Box Android 4K Ultra HD',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/tvbox_g7.jpg?v=1791928274',
+          mock_badge: 'TECNOLOGÍA',
+          mock_specs: 'Google TV · Control por voz · Conexión Wi-Fi 5G',
+          mock_price: '$ 160.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Bottom CTA Button {%- endcomment -%}
+    <div style="margin-top: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+      <a
+        href="{{ section.settings.btn_link | default: '/collections/all' }}"
+        class="tp-catalog-cta-btn"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+        </svg>
+        <span>{{ section.settings.btn_text | default: 'Ver catálogo' }}</span>
+        <span>→</span>
+      </a>
+      <p style="margin-top: 12px; font-size: 13px; color: #70757d;">
+        Audífonos, parlantes, cargadores, cables, cómputo y más en Montería.
+      </p>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .tp-catalog-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #111111;
+    color: #ffffff !important;
+    padding: 15px 34px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none !important;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .tp-catalog-cta-btn:hover {
+    background: #e02424;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(224, 36, 36, 0.35);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Tecno+ Catálogo Preview",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Etiqueta superior"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Catálogo"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Descripción",
+      "default": "Computadores, teléfonos, audio y tecnología de alto nivel para hacer tu día más cómodo y productivo."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Colección de Shopify (opcional)"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "default": 8,
+      "label": "Cantidad de productos a mostrar"
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Texto del botón",
+      "default": "Ver catálogo"
+    },
+    {
+      "type": "url",
+      "id": "btn_link",
+      "label": "Enlace del botón"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tecno+ Catálogo Preview"
+    }
+  ]
+}
+{% endschema %}

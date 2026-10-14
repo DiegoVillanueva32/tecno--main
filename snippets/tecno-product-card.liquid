@@ -1,0 +1,218 @@
+{%- comment -%}
+  Tecno+ Product Card (Matches Next.js Storefront exactly)
+  Parameters:
+    - product: Shopify product object (optional)
+    - mock_title: String (fallback)
+    - mock_image: Image asset name (fallback)
+    - mock_badge: String (fallback)
+    - mock_specs: String (fallback)
+    - mock_price: String (fallback)
+    - mock_compare: String (fallback)
+    - mock_url: String (fallback)
+    - button_theme: "red" | "black"
+{%- endcomment -%}
+
+{%- liquid
+  assign btn_class = "tp-buy-btn"
+  if button_theme == "black"
+    assign btn_class = "tp-buy-btn black"
+  endif
+
+  if product != blank
+    assign card_title = product.title
+    assign card_url = product.url
+    assign card_img = product.featured_image | image_url: width: 600
+    assign card_price = product.price | money
+    assign card_compare = product.compare_at_price | money
+    assign has_discount = false
+    if product.compare_at_price > product.price
+      assign has_discount = true
+    endif
+
+    assign card_badge = ""
+    for tag in product.tags
+      assign lower_tag = tag | downcase
+      if lower_tag contains 'top' or lower_tag contains 'nuevo' or lower_tag contains 'seminuevo' or lower_tag contains 'ai' or lower_tag contains 'oferta'
+        assign card_badge = tag
+        break
+      endif
+    endfor
+    if card_badge == "" and has_discount
+      assign card_badge = "OFERTA"
+    endif
+
+    assign card_specs = product.metafields.descriptors.subtitle.value
+    if card_specs == blank
+      assign card_specs = product.description | strip_html | truncate: 75
+    endif
+  else
+    assign card_title = mock_title
+    assign card_url = mock_url | default: '/collections/all'
+    if mock_image contains 'http://' or mock_image contains 'https://' or mock_image contains '//'
+      assign card_img = mock_image
+    else
+      assign card_img = mock_image | asset_url
+    endif
+    assign card_price = mock_price
+    assign card_compare = mock_compare
+    assign card_badge = mock_badge
+    assign card_specs = mock_specs
+    assign has_discount = false
+    if mock_compare != blank
+      assign has_discount = true
+    endif
+  endif
+-%}
+
+<article class="tp-card">
+  {%- comment -%} Top Badge and Checkmark {%- endcomment -%}
+  <div class="tp-card-top">
+    {%- if card_badge != blank -%}
+      <span class="tp-badge">{{ card_badge }}</span>
+    {%- else -%}
+      <span></span>
+    {%- endif -%}
+    <span class="tp-check">✓</span>
+  </div>
+
+  {%- comment -%} Picture wrapper with interactive scale and dots {%- endcomment -%}
+  <div class="tp-pic-wrapper">
+    <a href="{{ card_url }}" class="tp-pic" aria-label="{{ card_title }}">
+      <img
+        src="{{ card_img }}"
+        alt="{{ card_title }}"
+        loading="lazy"
+        width="240"
+        height="220"
+      >
+    </a>
+    <div class="tp-pic-dots" aria-hidden="true">
+      <span class="tp-pic-dot active"></span>
+      <span class="tp-pic-dot"></span>
+    </div>
+  </div>
+
+  {%- comment -%} Brand Label {%- endcomment -%}
+  <small>TECNO+</small>
+
+  {%- comment -%} Product Title {%- endcomment -%}
+  <a href="{{ card_url }}">
+    <h3 title="{{ card_title }}">{{ card_title }}</h3>
+  </a>
+
+  {%- comment -%} Short Specs / Description {%- endcomment -%}
+  <p>{{ card_specs }}</p>
+
+  {%- comment -%} Prices {%- endcomment -%}
+  <div class="tp-prices">
+    {%- if has_discount -%}
+      <del>{{ card_compare }}</del>
+    {%- endif -%}
+    <b>{{ card_price }}</b>
+  </div>
+
+  {%- comment -%} Add to Cart Action {%- endcomment -%}
+  {%- if product != blank and product.available -%}
+    <button
+      type="button"
+      class="{{ btn_class }} tp-add-to-cart-btn"
+      data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+      data-product-title="{{ card_title | escape }}"
+      aria-label="Añadir {{ card_title | escape }} al carrito"
+    >
+      <span>🛒 Añadir al carrito</span>
+      <span>+</span>
+    </button>
+  {%- elsif product != blank and product.available == false -%}
+    <button type="button" class="{{ btn_class }}" disabled style="opacity:0.5;cursor:not-allowed;">
+      <span>Sin stock</span>
+    </button>
+  {%- else -%}
+    <button
+      type="button"
+      class="{{ btn_class }}"
+      style="cursor: pointer; border: none; width: 100%;"
+      onclick="window.location.href='{{ card_url }}';"
+    >
+      <span>Ver producto</span>
+      <span>→</span>
+    </button>
+  {%- endif -%}
+</article>
+
+<script>
+(function() {
+  // Añadir al carrito via AJAX — ejecuta solo una vez por snippet
+  if (window.__tecnoCartListenerReady) return;
+  window.__tecnoCartListenerReady = true;
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.tp-add-to-cart-btn');
+    if (!btn) return;
+
+    var variantId = btn.dataset.variantId;
+    var title = btn.dataset.productTitle || 'Producto';
+    if (!variantId) return;
+
+    // Feedback visual inmediato
+    var originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span>Añadiendo...</span><span>⏳</span>';
+
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      body: JSON.stringify({ id: parseInt(variantId), quantity: 1 })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status === 422) throw new Error(data.description || 'Error');
+
+      // Éxito — feedback
+      btn.innerHTML = '<span>✓ Agregado</span><span>🛒</span>';
+      btn.style.background = '#16a34a';
+
+      // Actualizar contador del carrito
+      return fetch('/cart.js');
+    })
+    .then(function(r) { return r && r.json(); })
+    .then(function(cart) {
+      if (!cart) return;
+
+      // Actualizar badges de carrito en el header
+      var count = cart.item_count;
+      document.querySelectorAll('.tp-cart-badge, .cart-count-bubble span, [data-cart-count]').forEach(function(el) {
+        el.textContent = count;
+      });
+
+      // Abrir el cart drawer nativo de Shopify Dawn si existe
+      var cartDrawer = document.querySelector('cart-drawer');
+      if (cartDrawer && cartDrawer.open) {
+        cartDrawer.open(btn);
+      } else {
+        // Intentar disparar el evento nativo de Dawn
+        document.dispatchEvent(new CustomEvent('cart:open'));
+        // Fallback: mostrar notificación
+        var note = document.querySelector('cart-notification');
+        if (note && note.renderContents) note.renderContents(cart);
+      }
+
+      // Restaurar botón después de 2.5s
+      setTimeout(function() {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+        btn.style.background = '';
+      }, 2500);
+    })
+    .catch(function(err) {
+      btn.innerHTML = '<span>⚠ Error — intenta de nuevo</span>';
+      btn.style.background = '#b91c1c';
+      setTimeout(function() {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+        btn.style.background = '';
+      }, 2500);
+    });
+  });
+})();
+</script>

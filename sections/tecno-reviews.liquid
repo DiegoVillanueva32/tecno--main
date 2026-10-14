@@ -1,0 +1,1193 @@
+{%- comment -%}
+  Tecno+ Customer Reviews Section (Lo que dicen nuestros clientes)
+  - Conectado a Supabase en vivo (público para todos los visitantes)
+  - Permite comentar, calificar, subir foto de perfil real, dar like y borrar únicamente su propia reseña.
+{%- endcomment -%}
+
+<section id="opiniones" class="tp-section tp-reviews-section">
+  <div class="tp-container">
+    <div class="tp-reviews-head">
+      <span class="tp-verified-badge">
+        <span class="tp-verified-dot"></span>
+        <span id="rev-total-verified">86 Opiniones Verificadas en Colombia</span>
+      </span>
+      <h2>{{ section.settings.title | default: 'Lo que dicen nuestros clientes' }}</h2>
+      <p>
+        {{ section.settings.description | default: 'Experiencias reales de compradores en Montería y toda Colombia. Haz clic en cualquier tarjeta para enfocarla.' }}
+      </p>
+
+      {%- comment -%} Filter Pills & New Review Button {%- endcomment -%}
+      <div class="tp-reviews-filters">
+        <button
+          type="button"
+          class="tp-filter-pill tp-filter-btn"
+          onclick="openNewReviewModal()"
+          id="tp-btn-dejar-opinion"
+        >
+          ✏️ Dejar mi opinión (0 a 5★)
+        </button>
+        <button type="button" class="tp-filter-pill active" id="pill-all" onclick="filterReviewsCategory('all')">
+          Todas (<span id="count-pill-all">86</span>)
+        </button>
+        <button type="button" class="tp-filter-pill" id="pill-5" onclick="filterReviewsCategory('5')">
+          5 ★ (<span id="count-pill-5">78</span>)
+        </button>
+        <button type="button" class="tp-filter-pill" id="pill-4" onclick="filterReviewsCategory('4')">
+          4 ★ (<span id="count-pill-4">8</span>)
+        </button>
+      </div>
+    </div>
+
+    {%- comment -%} Carousel Container {%- endcomment -%}
+    <div class="tp-carousel-wrapper" id="reviews-carousel-{{ section.id }}">
+      <div class="tp-reviews-stage" id="tp-dynamic-reviews-stage">
+        {%- comment -%} Loading placeholder spinner {%- endcomment -%}
+        <div style="text-align: center; padding: 40px 0; color: #6b7280; font-size: 14px; font-weight: 600;">
+          <div class="tp-rev-spinner" style="margin: 0 auto 12px;"></div>
+          Cargando opiniones de clientes verificados...
+        </div>
+      </div>
+
+      {%- comment -%} Carousel Controls {%- endcomment -%}
+      <div class="tp-reviews-controls">
+        <button type="button" class="tp-rev-btn" onclick="prevReview()" aria-label="Anterior">‹</button>
+        <span class="tp-auto-indicator">
+          <span class="tp-dot-green">●</span> Rotando auto
+        </span>
+        <span class="tp-rev-counter" id="rev-counter">1 / 86</span>
+        <button type="button" class="tp-rev-btn" onclick="nextReview()" aria-label="Siguiente">›</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #tp-new-review-modal.tp-modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.72) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    z-index: 2147483647 !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+  }
+  #tp-new-review-modal .tp-modal-container {
+    width: 100% !important;
+    max-width: 520px !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+    border-radius: 24px !important;
+    padding: 26px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    box-shadow: 0 25px 60px -12px rgba(0,0,0,0.45) !important;
+    animation: tpModalFadeIn 0.25s ease-out !important;
+  }
+  @keyframes tpModalFadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+</style>
+
+{%- comment -%} Modal Para Dejar Nueva Opinión {%- endcomment -%}
+<div id="tp-new-review-modal" class="tp-modal-overlay" style="display: none;" onclick="if(event.target===this) window.closeNewReviewModal()">
+  <div class="tp-modal-container">
+    <button type="button" onclick="window.closeNewReviewModal()" style="position: absolute; right: 18px; top: 18px; background: #f3f4f6; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700;">✕</button>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+      <span style="font-size: 32px; display: block; margin-bottom: 6px;">⭐</span>
+      <h3 style="font-size: 22px; font-weight: 900; margin: 0; color: #111;">Comparte tu experiencia en Tecno+</h3>
+      <p style="font-size: 13px; color: #6b7280; margin: 6px 0 0;">Tu opinión quedará visible públicamente para toda la comunidad.</p>
+    </div>
+
+    <form id="tp-new-review-form" onsubmit="handleReviewSubmit(event)">
+      <div id="tp-rev-form-error" style="display: none; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 10px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; margin-bottom: 14px;"></div>
+
+      {%- comment -%} Selector de Estrellas {%- endcomment -%}
+      <div style="margin-bottom: 16px; text-align: center; background: #f9fafb; padding: 12px; border-radius: 16px; border: 1px solid #e5e7eb;">
+        <label style="display: block; font-size: 11px; font-weight: 800; color: #4b5563; text-transform: uppercase; margin-bottom: 6px;">Calificación General</label>
+        <div id="tp-star-picker" style="display: inline-flex; gap: 8px; font-size: 30px; cursor: pointer;">
+          <span data-star="1" onclick="selectRating(1)">★</span>
+          <span data-star="2" onclick="selectRating(2)">★</span>
+          <span data-star="3" onclick="selectRating(3)">★</span>
+          <span data-star="4" onclick="selectRating(4)">★</span>
+          <span data-star="5" onclick="selectRating(5)">★</span>
+        </div>
+        <div id="tp-rating-text" style="font-size: 12px; font-weight: 700; color: #111; margin-top: 4px;">5 estrellas - ¡Excelente servicio!</div>
+        <input type="hidden" id="tp-rev-rating" value="5">
+      </div>
+
+      {%- comment -%} Foto de Perfil {%- endcomment -%}
+      <div style="margin-bottom: 16px; background: #f9fafb; padding: 14px; border-radius: 16px; border: 1px solid #e5e7eb;">
+        <label style="display: block; font-size: 11px; font-weight: 800; color: #4b5563; text-transform: uppercase; margin-bottom: 8px;">Foto de Perfil (Opcional)</label>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div id="tp-avatar-preview-box" style="width: 52px; height: 52px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid #d1d5db; flex-shrink: 0;">
+            <span id="tp-avatar-placeholder-icon" style="font-size: 22px;">👤</span>
+            <img id="tp-avatar-preview-img" src="" alt="Vista previa" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div>
+            <button type="button" onclick="document.getElementById('tp-rev-photo-input').click()" style="background: #ffffff; border: 1.5px solid #d1d5db; padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #111; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+              <span>📸 Subir mi foto</span>
+            </button>
+            <button type="button" id="tp-remove-photo-btn" onclick="removeSelectedPhoto()" style="display: none; margin-left: 6px; background: none; border: none; font-size: 11px; color: #dc2626; font-weight: 700; cursor: pointer;">✕ Quitar</button>
+            <input type="file" id="tp-rev-photo-input" accept="image/*" style="display: none;" onchange="handlePhotoUpload(this)">
+            <input type="hidden" id="tp-rev-avatar-data" value="">
+            <div style="font-size: 10.5px; color: #6b7280; margin-top: 4px;">Se comprime automáticamente para carga rápida.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; color: #4b5563; margin-bottom: 4px;">Nombre completo *</label>
+          <input type="text" id="tp-rev-name" required placeholder="Ej. Carlos Mendoza" style="width: 100%; border: 1px solid #d1d5db; border-radius: 12px; padding: 9px 12px; font-size: 13px; outline: none; box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; color: #4b5563; margin-bottom: 4px;">Ciudad / Municipio *</label>
+          <input type="text" id="tp-rev-city" required placeholder="Ej. Montería, Córdoba" value="Montería, Córdoba" style="width: 100%; border: 1px solid #d1d5db; border-radius: 12px; padding: 9px 12px; font-size: 13px; outline: none; box-sizing: border-box;">
+        </div>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; color: #4b5563; margin-bottom: 4px;">¿Qué producto compraste o asesoraste?</label>
+        <select id="tp-rev-product" style="width: 100%; border: 1px solid #d1d5db; border-radius: 12px; padding: 9px 12px; font-size: 13px; outline: none; box-sizing: border-box; background: #fff;">
+          <option value="Celulares & Tecnología">📱 Celulares & Tecnología</option>
+          <option value="iPhone / Apple">🍎 iPhone / Apple</option>
+          <option value="Samsung Galaxy">⚡ Samsung Galaxy</option>
+          <option value="Xiaomi / Redmi">🔥 Xiaomi / Redmi</option>
+          <option value="Combos Especiales">🎁 Combos Especiales</option>
+          <option value="Cómputo & Laptops">💻 Cómputo & Laptops</option>
+          <option value="Mundo Gamer & Gadgets">🎮 Mundo Gamer & Gadgets</option>
+          <option value="Audífonos & Sonido">🎧 Audífonos & Sonido</option>
+          <option value="Cargadores & Accesorios">🔌 Cargadores & Accesorios</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; color: #4b5563; margin-bottom: 4px;">Título de tu reseña</label>
+        <input type="text" id="tp-rev-title" placeholder="Ej. Excelente servicio y entrega rápida" style="width: 100%; border: 1px solid #d1d5db; border-radius: 12px; padding: 9px 12px; font-size: 13px; outline: none; box-sizing: border-box;">
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; color: #4b5563; margin-bottom: 4px;">Tu comentario o experiencia * (Mínimo 10 caracteres)</label>
+        <textarea id="tp-rev-comment" required rows="3" placeholder="Cuéntanos cómo fue tu experiencia de compra, la atención o el estado del producto..." style="width: 100%; border: 1px solid #d1d5db; border-radius: 12px; padding: 9px 12px; font-size: 13px; outline: none; box-sizing: border-box; resize: vertical;"></textarea>
+      </div>
+
+      <div style="margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="tp-rev-recommended" checked style="width: 16px; height: 16px; accent-color: #059669; cursor: pointer;">
+        <label for="tp-rev-recommended" style="font-size: 12.5px; font-weight: 600; color: #374151; cursor: pointer;">Recomiendo comprar en Tecno+</label>
+      </div>
+
+      <button type="submit" id="tp-submit-review-btn" style="width: 100%; background: #111111; color: #ffffff; border: none; border-radius: 14px; padding: 13px 20px; font-size: 14px; font-weight: 800; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <span>Publicar mi opinión ahora</span>
+        <span>→</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+{% stylesheet %}
+  .tp-reviews-section {
+    background: #ffffff;
+    overflow: hidden;
+    padding: 70px 0 90px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  }
+
+  .tp-reviews-head {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 40px;
+  }
+
+  .tp-verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .tp-verified-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+  }
+
+  .tp-reviews-head h2 {
+    font-size: 44px;
+    letter-spacing: -0.04em;
+    font-weight: 900;
+    margin: 8px 0;
+    color: #111111;
+  }
+
+  .tp-reviews-head p {
+    color: #666666;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+
+  .tp-reviews-filters {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tp-filter-pill {
+    background: #ffffff;
+    border: 1px solid #e5e5e7;
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444444;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .tp-filter-btn {
+    background: #111111;
+    color: #ffffff !important;
+    border-color: #111111;
+  }
+
+  .tp-filter-pill.active {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+  }
+
+  .tp-filter-pill:hover {
+    border-color: #111111;
+  }
+
+  .tp-carousel-wrapper {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 0;
+  }
+
+  .tp-reviews-stage {
+    position: relative;
+    height: 330px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .tp-review-card {
+    position: absolute;
+    width: 100%;
+    max-width: 480px;
+    background: #ffffff;
+    border: 1px solid #e8e8ea;
+    border-radius: 28px;
+    padding: 26px 28px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.06);
+    transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.85);
+    box-sizing: border-box;
+  }
+
+  .tp-review-card.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0) scale(1);
+    z-index: 10;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.1);
+  }
+
+  .tp-review-card.prev {
+    opacity: 0.35;
+    transform: translateX(-55%) scale(0.88);
+    z-index: 5;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .tp-review-card.next {
+    opacity: 0.35;
+    transform: translateX(55%) scale(0.88);
+    z-index: 5;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .tp-review-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .tp-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 16px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .tp-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+  }
+
+  .tp-user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    min-width: 0;
+  }
+
+  .tp-user-info b {
+    font-size: 15px;
+    color: #111111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tp-user-info span {
+    font-size: 12px;
+    color: #70757d;
+  }
+
+  .tp-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .tp-review-time {
+    font-size: 11px;
+    color: #888888;
+    white-space: nowrap;
+  }
+
+  .tp-del-my-rev {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 10.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .tp-del-my-rev:hover {
+    background: #fee2e2;
+    border-color: #f87171;
+  }
+
+  .tp-rating-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .tp-stars {
+    color: #f59e0b;
+    font-size: 15px;
+    letter-spacing: 2px;
+  }
+
+  .tp-score {
+    font-weight: 800;
+    font-size: 13px;
+    color: #111111;
+  }
+
+  .tp-badge-recomienda {
+    color: #059669;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .tp-review-card h4 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #111111;
+    margin: 0 0 6px;
+    text-align: left;
+    line-height: 1.3;
+  }
+
+  .tp-review-card p {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #4b5563;
+    margin: 0 0 16px;
+    text-align: left;
+    max-height: 72px;
+    overflow-y: auto;
+  }
+
+  .tp-review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f0f0f2;
+    padding-top: 12px;
+    font-size: 12px;
+    color: #70757d;
+  }
+
+  .tp-like-btn {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .tp-like-btn:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+  }
+
+  .tp-like-btn.liked {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+  }
+
+  .tp-reviews-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .tp-rev-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #e8e8ea;
+    background: #ffffff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+  }
+
+  .tp-rev-btn:hover {
+    background: #f6f6f7;
+    border-color: #111111;
+  }
+
+  .tp-auto-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #e8e8ea;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #333333;
+  }
+
+  .tp-dot-green {
+    color: #22c55e;
+  }
+
+  .tp-rev-counter {
+    font-size: 12px;
+    font-weight: 700;
+    color: #70757d;
+  }
+
+  .tp-rev-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #111111;
+    border-radius: 50%;
+    animation: tp-spin 0.8s linear infinite;
+  }
+
+  @keyframes tp-spin {
+    to { transform: rotate(360deg); }
+  }
+{% endstylesheet %}
+
+<script>
+  (function() {
+    var SUPABASE_URL = "https://loytxdzobuqpemjxhnza.supabase.co/rest/v1/reviews";
+    var SUPABASE_KEY = "sb_publishable_d6_rrLaq6L4It5JuRavq0g_1L-S8RNQ";
+
+    var allReviews = [];
+    var filteredReviews = [];
+    var currentIndex = 0;
+    var currentFilter = "all";
+    var autoRotateInterval = null;
+
+    var AVATAR_COLORS = ["#059669", "#2563eb", "#d97706", "#7c3aed", "#e11d48", "#0891b2"];
+
+    var RATING_DESCRIPTIONS = {
+      0: "0 estrellas - Muy insatisfecho",
+      1: "1 estrella - Mal servicio",
+      2: "2 estrellas - Regular",
+      3: "3 estrellas - Bueno",
+      4: "4 estrellas - Muy bueno",
+      5: "5 estrellas - ¡Excelente servicio!"
+    };
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+
+    function formatTimeAgo(isoString, dateString, id) {
+      var ts = isoString || (dateString && !isNaN(Date.parse(dateString)) ? dateString : null);
+      if (!ts && id) {
+        var match = id.match(/^rev-(\d{13})/);
+        if (match) {
+          var ms = parseInt(match[1], 10);
+          if (!isNaN(ms) && ms > 1600000000000) ts = new Date(ms).toISOString();
+        }
+      }
+      if (ts) {
+        var diffSec = Math.max(0, Math.floor((Date.now() - new Date(ts).getTime()) / 1000));
+        if (diffSec < 45) return "Hace unos segundos";
+        var diffMin = Math.floor(diffSec / 60);
+        if (diffMin < 60) return "Hace " + diffMin + " min";
+        var diffHours = Math.floor(diffMin / 60);
+        if (diffHours < 24) return "Hace " + diffHours + (diffHours === 1 ? " hora" : " horas");
+        var diffDays = Math.floor(diffHours / 24);
+        if (diffDays < 7) return "Hace " + diffDays + (diffDays === 1 ? " día" : " días");
+        var diffWeeks = Math.floor(diffDays / 7);
+        if (diffWeeks < 4) return "Hace " + diffWeeks + (diffWeeks === 1 ? " sem" : " semanas");
+        var diffMonths = Math.floor(diffDays / 30);
+        return "Hace " + diffMonths + (diffMonths === 1 ? " mes" : " meses");
+      }
+      return dateString || "Hace unos momentos";
+    }
+
+    function getMyReviewIds() {
+      try {
+        var stored = localStorage.getItem("tecnoplus_my_review_ids");
+        return stored ? JSON.parse(stored) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function addMyReviewId(id) {
+      try {
+        var ids = getMyReviewIds();
+        if (ids.indexOf(id) === -1) {
+          ids.push(id);
+          localStorage.setItem("tecnoplus_my_review_ids", JSON.stringify(ids));
+        }
+      } catch(e) {}
+    }
+
+    function removeMyReviewId(id) {
+      try {
+        var ids = getMyReviewIds().filter(function(i) { return i !== id; });
+        localStorage.setItem("tecnoplus_my_review_ids", JSON.stringify(ids));
+      } catch(e) {}
+    }
+
+    function getLikedReviewIds() {
+      try {
+        var stored = localStorage.getItem("tecnoplus_liked_reviews");
+        return stored ? JSON.parse(stored) : {};
+      } catch(e) {
+        return {};
+      }
+    }
+
+    function setReviewLiked(id) {
+      try {
+        var liked = getLikedReviewIds();
+        liked[id] = true;
+        localStorage.setItem("tecnoplus_liked_reviews", JSON.stringify(liked));
+      } catch(e) {}
+    }
+
+    function updateCounters() {
+      var total = allReviews.length;
+      var f5 = allReviews.filter(function(r) { return Math.round(Number(r.rating)) === 5; }).length;
+      var f4 = allReviews.filter(function(r) { return Math.round(Number(r.rating)) === 4; }).length;
+
+      var totalVerifiedEl = document.getElementById("rev-total-verified");
+      if (totalVerifiedEl) totalVerifiedEl.textContent = total + " Opiniones Verificadas en Colombia";
+
+      var pAll = document.getElementById("count-pill-all");
+      if (pAll) pAll.textContent = total;
+      var p5 = document.getElementById("count-pill-5");
+      if (p5) p5.textContent = f5;
+      var p4 = document.getElementById("count-pill-4");
+      if (p4) p4.textContent = f4;
+    }
+
+    function renderStage() {
+      var stage = document.getElementById("tp-dynamic-reviews-stage");
+      var counter = document.getElementById("rev-counter");
+      if (!stage) return;
+
+      if (filteredReviews.length === 0) {
+        stage.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #6b7280;">' +
+          '<div style="font-size: 32px; margin-bottom: 8px;">💬</div>' +
+          '<p style="font-weight: 700; color: #111; margin: 0 0 4px;">No hay opiniones en este filtro</p>' +
+          '<p style="font-size: 13px; margin: 0 0 14px;">Sé el primero en compartir tu experiencia.</p>' +
+          '<button type="button" class="tp-filter-pill tp-filter-btn" onclick="openNewReviewModal()">Dejar mi opinión</button>' +
+          '</div>';
+        if (counter) counter.textContent = "0 / 0";
+        return;
+      }
+
+      if (currentIndex >= filteredReviews.length) {
+        currentIndex = 0;
+      }
+
+      stage.innerHTML = "";
+      var myIds = getMyReviewIds();
+      var likedMap = getLikedReviewIds();
+
+      filteredReviews.forEach(function(rev, idx) {
+        var card = document.createElement("div");
+        card.className = "tp-review-card";
+
+        if (idx === currentIndex) {
+          card.classList.add("active");
+        } else if (idx === (currentIndex - 1 + filteredReviews.length) % filteredReviews.length) {
+          card.classList.add("prev");
+        } else if (idx === (currentIndex + 1) % filteredReviews.length) {
+          card.classList.add("next");
+        } else {
+          card.classList.add("hidden-card");
+        }
+
+        var isMy = myIds.indexOf(rev.id) !== -1;
+        var deleteBtnHtml = isMy ?
+          '<button type="button" class="tp-del-my-rev" onclick="event.stopPropagation(); window.deleteMyReview(\'' + rev.id + '\')" title="Borrar mi comentario">' +
+            '<span>🗑️</span><span>Borrar</span>' +
+          '</button>' : '';
+
+        var isLiked = Boolean(likedMap[rev.id]);
+        var likesCount = rev.likes || 0;
+
+        // Avatar
+        var colorIdx = (rev.name || "A").charCodeAt(0) % AVATAR_COLORS.length;
+        var avatarBg = AVATAR_COLORS[colorIdx];
+        var initialLetter = (rev.name || "U").charAt(0).toUpperCase();
+
+        var avatarHtml = rev.avatar_url ?
+          '<div class="tp-avatar"><img src="' + rev.avatar_url + '" alt="' + escapeHtml(rev.name) + '" class="tp-avatar-img" onerror="this.style.display=\'none\'; this.parentElement.textContent=\'' + initialLetter + '\'"></div>' :
+          '<div class="tp-avatar" style="background: ' + avatarBg + ';">' + initialLetter + '</div>';
+
+        var starsStr = "★★★★★".substring(0, Math.min(5, Math.max(0, Math.round(rev.rating || 5))));
+        while (starsStr.length < 5) starsStr += "☆";
+
+        var recHtml = rev.recommended !== false ? '<span class="tp-badge-recomienda">● Recomienda</span>' : '';
+        var timeAgoText = formatTimeAgo(rev.created_at, rev.date, rev.id);
+
+        card.innerHTML =
+          '<div class="tp-review-header">' +
+            avatarHtml +
+            '<div class="tp-user-info">' +
+              '<b>' + escapeHtml(rev.name) + '</b>' +
+              '<span>📍 ' + escapeHtml(rev.city || "Montería, Córdoba") + '</span>' +
+            '</div>' +
+            '<div class="tp-header-right">' +
+              '<span class="tp-review-time">⏱️ ' + timeAgoText + '</span>' +
+              deleteBtnHtml +
+            '</div>' +
+          '</div>' +
+          '<div class="tp-rating-row">' +
+            '<span class="tp-stars">' + starsStr + '</span>' +
+            '<span class="tp-score">' + Number(rev.rating || 5).toFixed(1) + '</span>' +
+            recHtml +
+          '</div>' +
+          '<h4>' + escapeHtml(rev.title || "Excelente experiencia") + '</h4>' +
+          '<p>' + escapeHtml(rev.comment || "") + '</p>' +
+          '<div class="tp-review-footer">' +
+            '<span class="tp-tag">📦 ' + escapeHtml(rev.product || "Celulares & Tecnología") + '</span>' +
+            '<button type="button" class="tp-like-btn ' + (isLiked ? 'liked' : '') + '" onclick="event.stopPropagation(); window.toggleLike(\'' + rev.id + '\')">' +
+              '<span>👍</span><span id="like-count-' + rev.id + '">' + likesCount + '</span>' +
+            '</button>' +
+          '</div>';
+
+        card.onclick = function() {
+          if (idx !== currentIndex) {
+            currentIndex = idx;
+            renderStage();
+          }
+        };
+
+        stage.appendChild(card);
+      });
+
+      if (counter) {
+        counter.textContent = (currentIndex + 1) + " / " + filteredReviews.length;
+      }
+    }
+
+    function applyFilter(cat) {
+      currentFilter = cat;
+      document.querySelectorAll(".tp-reviews-filters .tp-filter-pill:not(.tp-filter-btn)").forEach(function(pill) {
+        pill.classList.remove("active");
+      });
+      var activePill = document.getElementById("pill-" + cat);
+      if (activePill) activePill.classList.add("active");
+
+      if (cat === "5") {
+        filteredReviews = allReviews.filter(function(r) { return Math.round(Number(r.rating)) === 5; });
+      } else if (cat === "4") {
+        filteredReviews = allReviews.filter(function(r) { return Math.round(Number(r.rating)) === 4; });
+      } else {
+        filteredReviews = allReviews.slice();
+      }
+      currentIndex = 0;
+      renderStage();
+    }
+
+    window.filterReviewsCategory = function(cat) {
+      applyFilter(cat);
+    };
+
+    window.nextReview = function() {
+      if (!filteredReviews.length) return;
+      currentIndex = (currentIndex + 1) % filteredReviews.length;
+      renderStage();
+    };
+
+    window.prevReview = function() {
+      if (!filteredReviews.length) return;
+      currentIndex = (currentIndex - 1 + filteredReviews.length) % filteredReviews.length;
+      renderStage();
+    };
+
+    // Dar Like
+    window.toggleLike = function(id) {
+      var likedMap = getLikedReviewIds();
+      if (likedMap[id]) return; // ya le dio like
+
+      setReviewLiked(id);
+
+      var rev = allReviews.find(function(r) { return r.id === id; });
+      if (rev) {
+        rev.likes = (rev.likes || 0) + 1;
+        var countEl = document.getElementById("like-count-" + id);
+        if (countEl) countEl.textContent = rev.likes;
+        var btn = countEl ? countEl.parentElement : null;
+        if (btn) btn.classList.add("liked");
+
+        // Enviar a Supabase
+        fetch(SUPABASE_URL + "?id=eq." + encodeURIComponent(id), {
+          method: "PATCH",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + SUPABASE_KEY,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ likes: rev.likes })
+        }).catch(function(err) {
+          console.warn("Error updating like on Supabase:", err);
+        });
+      }
+    };
+
+    // Borrar SOLO mi propio comentario
+    window.deleteMyReview = function(id) {
+      var myIds = getMyReviewIds();
+      if (myIds.indexOf(id) === -1) {
+        alert("Solo puedes eliminar las opiniones publicadas desde tu dispositivo.");
+        return;
+      }
+
+      if (!confirm("¿Estás seguro de que deseas eliminar tu opinión? Esta acción no se puede deshacer.")) {
+        return;
+      }
+
+      // Eliminar de Supabase
+      fetch(SUPABASE_URL + "?id=eq." + encodeURIComponent(id), {
+        method: "DELETE",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY
+        }
+      }).then(function(res) {
+        if (!res.ok) throw new Error("Error en servidor");
+        removeMyReviewId(id);
+        allReviews = allReviews.filter(function(r) { return r.id !== id; });
+        applyFilter(currentFilter);
+        updateCounters();
+        alert("Tu opinión ha sido eliminada con éxito.");
+      }).catch(function(err) {
+        console.error("Error al eliminar reseña:", err);
+        alert("No se pudo eliminar la reseña. Por favor verifica tu conexión.");
+      });
+    };
+
+    // Modal Control
+    window.openNewReviewModal = function() {
+      var modal = document.getElementById("tp-new-review-modal");
+      if (modal) {
+        modal.style.setProperty("display", "flex", "important");
+        document.body.style.overflow = "hidden";
+      }
+    };
+
+    window.closeNewReviewModal = function() {
+      var modal = document.getElementById("tp-new-review-modal");
+      if (modal) {
+        modal.style.setProperty("display", "none", "important");
+        document.body.style.overflow = "";
+      }
+    };
+
+    // Attach direct listeners
+    try {
+      var btnDejar = document.getElementById("tp-btn-dejar-opinion");
+      if (btnDejar) {
+        btnDejar.onclick = function(e) {
+          if (e) e.preventDefault();
+          window.openNewReviewModal();
+        };
+      }
+    } catch(e) {}
+
+    window.selectRating = function(stars) {
+      document.getElementById("tp-rev-rating").value = stars;
+      var textEl = document.getElementById("tp-rating-text");
+      if (textEl && RATING_DESCRIPTIONS[stars]) {
+        textEl.textContent = RATING_DESCRIPTIONS[stars];
+      }
+      var starSpans = document.querySelectorAll("#tp-star-picker span");
+      starSpans.forEach(function(s, idx) {
+        if (idx < stars) {
+          s.style.color = "#f59e0b";
+        } else {
+          s.style.color = "#d1d5db";
+        }
+      });
+    };
+
+    // Foto de perfil con compresión canvas
+    window.handlePhotoUpload = function(input) {
+      if (!input.files || !input.files[0]) return;
+      var file = input.files[0];
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var maxDim = 140;
+          var w = img.width;
+          var h = img.height;
+          if (w > h) {
+            if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          } else {
+            if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+          }
+          var canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          var dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+
+          document.getElementById("tp-rev-avatar-data").value = dataUrl;
+          var previewImg = document.getElementById("tp-avatar-preview-img");
+          var placeholder = document.getElementById("tp-avatar-placeholder-icon");
+          var removeBtn = document.getElementById("tp-remove-photo-btn");
+
+          if (previewImg && placeholder && removeBtn) {
+            previewImg.src = dataUrl;
+            previewImg.style.display = "block";
+            placeholder.style.display = "none";
+            removeBtn.style.display = "inline";
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.removeSelectedPhoto = function() {
+      document.getElementById("tp-rev-avatar-data").value = "";
+      document.getElementById("tp-rev-photo-input").value = "";
+      var previewImg = document.getElementById("tp-avatar-preview-img");
+      var placeholder = document.getElementById("tp-avatar-placeholder-icon");
+      var removeBtn = document.getElementById("tp-remove-photo-btn");
+      if (previewImg && placeholder && removeBtn) {
+        previewImg.style.display = "none";
+        placeholder.style.display = "block";
+        removeBtn.style.display = "none";
+      }
+    };
+
+    // Publicar Opinión
+    window.handleReviewSubmit = function(e) {
+      e.preventDefault();
+      var errEl = document.getElementById("tp-rev-form-error");
+      if (errEl) errEl.style.display = "none";
+
+      var name = document.getElementById("tp-rev-name").value.trim();
+      var city = document.getElementById("tp-rev-city").value.trim() || "Montería, Córdoba";
+      var rating = Number(document.getElementById("tp-rev-rating").value) || 5;
+      var product = document.getElementById("tp-rev-product").value;
+      var title = document.getElementById("tp-rev-title").value.trim() || (rating >= 4 ? "¡Excelente experiencia!" : "Opinión del producto");
+      var comment = document.getElementById("tp-rev-comment").value.trim();
+      var recommended = document.getElementById("tp-rev-recommended").checked;
+      var avatarUrl = document.getElementById("tp-rev-avatar-data").value.trim() || null;
+
+      if (!name) {
+        if (errEl) { errEl.textContent = "Por favor ingresa tu nombre completo."; errEl.style.display = "block"; }
+        return;
+      }
+      if (!comment || comment.length < 10) {
+        if (errEl) { errEl.textContent = "Por favor escribe un comentario de al menos 10 caracteres."; errEl.style.display = "block"; }
+        return;
+      }
+
+      var submitBtn = document.getElementById("tp-submit-review-btn");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Publicando en Tecno+...</span>';
+      }
+
+      var reviewId = "rev-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7);
+
+      var newReviewPayload = {
+        id: reviewId,
+        name: name,
+        city: city,
+        rating: rating,
+        date: "Hace unos momentos",
+        product: product,
+        title: title,
+        comment: comment,
+        verified: true,
+        recommended: recommended,
+        likes: 0,
+        avatar_url: avatarUrl,
+        created_at: new Date().toISOString()
+      };
+
+      // Guardar en Supabase
+      fetch(SUPABASE_URL, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "Content-Type": "application/json",
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(newReviewPayload)
+      })
+      .then(function(res) {
+        if (!res.ok) throw new Error("Error al publicar");
+        return res.json();
+      })
+      .then(function() {
+        addMyReviewId(reviewId);
+        allReviews.unshift(newReviewPayload);
+        applyFilter("all");
+        updateCounters();
+        closeNewReviewModal();
+
+        // Reset form
+        document.getElementById("tp-rev-form-error").style.display = "none";
+        document.getElementById("tp-rev-title").value = "";
+        document.getElementById("tp-rev-comment").value = "";
+        removeSelectedPhoto();
+
+        alert("¡Tu opinión ha sido publicada exitosamente y ya es visible para toda la comunidad de Tecno+!");
+      })
+      .catch(function(err) {
+        console.error("Error al publicar opinión:", err);
+        // Fallback optimista local
+        addMyReviewId(reviewId);
+        allReviews.unshift(newReviewPayload);
+        applyFilter("all");
+        updateCounters();
+        closeNewReviewModal();
+        alert("¡Tu opinión ha sido añadida exitosamente!");
+      })
+      .finally(function() {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Publicar mi opinión ahora</span><span>→</span>';
+        }
+      });
+    };
+
+    // Cargar opiniones desde Supabase
+    fetch(SUPABASE_URL + "?select=*&order=created_at.desc", {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY
+      }
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error("Error HTTP " + res.status);
+      return res.json();
+    })
+    .then(function(data) {
+      if (Array.isArray(data) && data.length > 0) {
+        allReviews = data;
+      }
+      applyFilter("all");
+      updateCounters();
+    })
+    .catch(function(err) {
+      console.warn("Cargando opiniones de respaldo:", err);
+      // Fallback si la conexión inicial tarda
+      allReviews = [
+        {
+          id: "rev-g1",
+          name: "María Fernanda Getial Pastrana",
+          city: "Montería, Córdoba",
+          rating: 5,
+          date: "Hace 3 días",
+          product: "Celulares & Tecnología",
+          title: "Súper buena atención y precios justos",
+          comment: "Súper buena atención, los precios justos y me ha encantado mi celular.",
+          verified: true,
+          recommended: true,
+          likes: 18,
+          created_at: new Date(Date.now() - 3 * 86400000).toISOString()
+        },
+        {
+          id: "rev-g2",
+          name: "Kiara Yanez",
+          city: "Montería, Córdoba",
+          rating: 5,
+          date: "Hace 5 días",
+          product: "Celulares & Tecnología",
+          title: "Me gustó mucho el servicio",
+          comment: "Me gustó mucho el servicio, muy buena la atención. Lo recomendaría.",
+          verified: true,
+          recommended: true,
+          likes: 17,
+          created_at: new Date(Date.now() - 5 * 86400000).toISOString()
+        },
+        {
+          id: "rev-g3",
+          name: "Diego",
+          city: "Montería, Córdoba",
+          rating: 5,
+          date: "Hace 5 días",
+          product: "Cómputo & Laptops",
+          title: "Excelentes instalaciones y atención",
+          comment: "Excelente servicio al cliente, buenas instalaciones y atención, productos de calidad garantizada.",
+          verified: true,
+          recommended: true,
+          likes: 19,
+          created_at: new Date(Date.now() - 5 * 86400000).toISOString()
+        },
+        {
+          id: "rev-g4",
+          name: "Cindy Montaño",
+          city: "Montería, Córdoba",
+          rating: 5,
+          date: "Hace 6 días",
+          product: "Celulares & Tecnología",
+          title: "Súper recomendado",
+          comment: "Compré mi teléfono con entrega rápida el mismo día en Montería. Muy amables y atentos.",
+          verified: true,
+          recommended: true,
+          likes: 21,
+          created_at: new Date(Date.now() - 6 * 86400000).toISOString()
+        }
+      ];
+      applyFilter("all");
+      updateCounters();
+    });
+
+    // Auto rotación suave del carrusel cada 5 segundos
+    autoRotateInterval = setInterval(function() {
+      if (filteredReviews.length > 1) {
+        currentIndex = (currentIndex + 1) % filteredReviews.length;
+        renderStage();
+      }
+    }, 5500);
+
+    // Inicializar picker de 5 estrellas
+    window.selectRating(5);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Tecno+ Opiniones",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Lo que dicen nuestros clientes"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Descripción",
+      "default": "Experiencias reales de compradores en Montería y toda Colombia. Haz clic en cualquier tarjeta para enfocarla."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tecno+ Opiniones"
+    }
+  ]
+}
+{% endschema %}

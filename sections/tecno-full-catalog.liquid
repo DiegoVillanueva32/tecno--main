@@ -1,0 +1,1958 @@
+{%- comment -%}
+  Tecno+ Catálogo Completo (589+ items, Search, Filters, Sorting & Quick View Modal)
+{%- endcomment -%}
+
+<section class="tp-catalog-page" id="catalogo-completo">
+  <div class="tp-container">
+    {%- comment -%} Breadcrumb {%- endcomment -%}
+    <nav class="tp-catalog-breadcrumb" aria-label="Ruta de navegación">
+      <a href="{{ routes.root_url }}">Inicio</a>
+      <span class="tp-breadcrumb-sep">/</span>
+      <b>Catálogo Completo</b>
+    </nav>
+
+    {%- comment -%} Hero Banner {%- endcomment -%}
+    <div class="tp-catalog-hero">
+      <div class="tp-catalog-hero-text">
+        <span class="tp-badge-official">INVENTARIO OFICIAL 2026</span>
+        <h1>Catálogo</h1>
+        <p>
+          Explora más de 500 referencias de celulares, audio, gaming, cómputo y accesorios con precios oficiales actualizados. Compra online rápida y 100% segura con tarjeta o PSE.
+        </p>
+      </div>
+
+      <div class="tp-catalog-hero-preview">
+        <div id="tp-hero-3d-box" class="tp-catalog-3d-box">
+          <div id="tp-3d-canvas-wrap"></div>
+          
+          <div id="tp-3d-loader">
+            <div class="tp-3d-spinner"></div>
+            <span>Cargando modelos 3D...</span>
+          </div>
+
+          <div id="tp-3d-indicators"></div>
+        </div>
+      </div>
+
+      <div class="tp-hero-glow-red"></div>
+      <div class="tp-hero-glow-white"></div>
+    </div>
+
+    {%- comment -%} Search & Sort Bar {%- endcomment -%}
+    <div class="tp-catalog-controls">
+      <div class="tp-search-input-wrap">
+        <svg class="tp-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          id="cat-search-input"
+          placeholder="Buscar por nombre (ej. Diadema, Parlante, Cargador...) o código..."
+          oninput="onSearchInput(this.value)"
+        >
+        <button type="button" id="cat-search-clear" onclick="clearSearch()" style="display: none;">✕</button>
+      </div>
+
+      <div class="tp-sort-wrap">
+        <label for="cat-sort-select">Ordenar:</label>
+        <select id="cat-sort-select" onchange="onSortChange(this.value)">
+          <option value="featured">Destacados</option>
+          <option value="price-asc">Menor precio</option>
+          <option value="price-desc">Mayor precio</option>
+          <option value="name">Nombre (A - Z)</option>
+        </select>
+      </div>
+    </div>
+
+    {%- comment -%} Category Pills Tabs {%- endcomment -%}
+    <div class="tp-category-tabs" id="cat-tabs-bar">
+      {%- comment -%} Injected dynamically by JS {%- endcomment -%}
+    </div>
+
+    {%- comment -%} Results Count Header {%- endcomment -%}
+    <div class="tp-catalog-results-bar">
+      <span id="cat-count-text">Cargando catálogo oficial...</span>
+      <span class="tp-catalog-currency-hint">Precios en pesos colombianos (COP)</span>
+    </div>
+
+    {%- comment -%} Products Grid {%- endcomment -%}
+    <div class="tp-catalog-grid" id="cat-products-grid">
+      {%- comment -%} Rendered dynamically by JS {%- endcomment -%}
+    </div>
+
+    {%- comment -%} Load More CTA {%- endcomment -%}
+    <div class="tp-load-more-wrap" id="cat-load-more-wrap" style="display: none;">
+      <button type="button" class="tp-load-more-btn" onclick="loadMoreProducts()">
+        <span id="cat-load-more-text">Cargar más productos (+24)</span>
+        <span>↓</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+{%- comment -%} Quick View Modal {%- endcomment -%}
+<div id="tp-product-modal" class="tp-modal-overlay" style="display: none;" onclick="closeModal(event)">
+  <div class="tp-modal-box" onclick="event.stopPropagation()">
+    <button type="button" class="tp-modal-close" onclick="closeModal()" aria-label="Cerrar modal">✕</button>
+    <div class="tp-modal-content" id="modal-content">
+      {%- comment -%} Injected dynamically by JS {%- endcomment -%}
+    </div>
+  </div>
+</div>
+
+<style>
+  .tp-catalog-page {
+    background: #f8f9fa;
+    padding: 24px 0 80px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    color: #111111;
+  }
+
+  .tp-catalog-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: #70757d;
+    margin-bottom: 20px;
+  }
+
+  .tp-catalog-breadcrumb a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .tp-catalog-breadcrumb a:hover {
+    color: #111111;
+  }
+
+  .tp-breadcrumb-sep {
+    color: #9ca3af;
+  }
+
+  .tp-catalog-breadcrumb b {
+    color: #111111;
+    font-weight: 700;
+  }
+
+  /* Hero Banner */
+  .tp-catalog-hero {
+    background: #111111;
+    color: #ffffff;
+    border-radius: 28px;
+    padding: 44px 50px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    margin-bottom: 24px;
+    min-height: 320px;
+  }
+
+  .tp-catalog-hero-text {
+    position: relative;
+    z-index: 10;
+    max-width: 580px;
+    flex: 1;
+  }
+
+  .tp-badge-official {
+    display: inline-block;
+    background: #e02424;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 12px rgba(224, 36, 36, 0.35);
+  }
+
+  .tp-catalog-hero-text h1 {
+    font-size: 46px;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    margin: 0 0 16px;
+  }
+
+  .tp-catalog-hero-text p {
+    color: #d1d5db;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .tp-catalog-hero-preview {
+    position: relative;
+    z-index: 10;
+    width: 320px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .tp-catalog-3d-box {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  #tp-3d-canvas-wrap {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  #tp-3d-canvas-wrap:active {
+    cursor: grabbing;
+  }
+
+  #tp-3d-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(17, 17, 17, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    border-radius: 24px;
+    transition: opacity 0.4s ease;
+  }
+
+  .tp-3d-spinner {
+    width: 28px;
+    height: 28px;
+    border: 2.5px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #e02424;
+    border-radius: 50%;
+    animation: tp-spin 0.8s linear infinite;
+  }
+
+  #tp-3d-loader span {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    letter-spacing: 0.5px;
+    font-family: monospace;
+  }
+
+  #tp-3d-indicators {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(10px);
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.3s;
+  }
+
+  .tp-3d-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .tp-3d-pill {
+    height: 7px;
+    width: 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.35);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tp-3d-nav-btn.active .tp-3d-pill {
+    width: 22px;
+    background: #e02424;
+    box-shadow: 0 0 10px rgba(224, 36, 36, 0.6);
+  }
+
+  .tp-3d-nav-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    white-space: nowrap;
+    animation: tpFadeIn 0.3s ease;
+  }
+
+  .tp-hero-glow-red {
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: #e02424;
+    opacity: 0.28;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+
+  .tp-hero-glow-white {
+    position: absolute;
+    right: 32%;
+    bottom: -50px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: #ffffff;
+    opacity: 0.07;
+    filter: blur(70px);
+    pointer-events: none;
+  }
+
+  /* Search & Sort Controls */
+  .tp-catalog-controls {
+    background: #ffffff;
+    border: 1px solid #e8e8ea;
+    border-radius: 20px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .tp-search-input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .tp-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: #9aa0a6;
+    pointer-events: none;
+  }
+
+  .tp-search-input-wrap input {
+    width: 100%;
+    border-radius: 999px;
+    border: 1px solid #dfe1e5;
+    background: #f8f9fa;
+    padding: 11px 40px 11px 42px;
+    font-size: 13.5px;
+    color: #111111;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .tp-search-input-wrap input:focus {
+    border-color: #e02424;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(224, 36, 36, 0.1);
+  }
+
+  #cat-search-clear {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: #e5e7eb;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tp-sort-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tp-sort-wrap label {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #70757d;
+  }
+
+  .tp-sort-wrap select {
+    border-radius: 12px;
+    border: 1px solid #dfe1e5;
+    background: #ffffff;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #111111;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .tp-sort-wrap select:focus {
+    border-color: #e02424;
+  }
+
+  /* Category Tabs */
+  .tp-category-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    margin-bottom: 22px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tp-category-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tp-cat-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid #e8e8ea;
+    background: #ffffff;
+    color: #555555;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tp-cat-tab:hover {
+    background: #f1f2f4;
+  }
+
+  .tp-cat-tab.active {
+    background: #e02424;
+    color: #ffffff;
+    border-color: #e02424;
+    box-shadow: 0 4px 12px rgba(224, 36, 36, 0.28);
+  }
+
+  .tp-cat-tab-badge {
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .tp-cat-tab.active .tp-cat-tab-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+  }
+
+  /* Results Bar */
+  .tp-catalog-results-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    color: #70757d;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tp-catalog-currency-hint {
+    font-size: 11.5px;
+    color: #9ca3af;
+  }
+
+  /* Products Grid */
+  .tp-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .tp-cat-card {
+    background: #ffffff;
+    border: 1px solid #e8e8ea;
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    min-height: 410px;
+    position: relative;
+  }
+
+  .tp-cat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 35px rgba(0, 0, 0, 0.09);
+    border-color: #fca5a5;
+  }
+
+  .tp-cat-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .tp-cat-card-category {
+    background: #fef2f2;
+    color: #e02424;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tp-cat-card-code {
+    background: #f3f4f6;
+    color: #4b5563;
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .tp-cat-card-img-wrap {
+    height: 190px;
+    background: #fafafa;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #f3f4f6;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .tp-cat-card-img-wrap img {
+    max-width: 90%;
+    max-height: 165px;
+    object-fit: contain;
+    transition: transform 0.35s ease;
+  }
+
+  .tp-cat-card:hover .tp-cat-card-img-wrap img {
+    transform: scale(1.06);
+  }
+
+  .tp-card-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #f59e0b;
+    color: #ffffff;
+    font-size: 9.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+    z-index: 2;
+  }
+
+  .tp-cat-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111111;
+    margin: 0 0 6px;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 38px;
+    transition: color 0.2s;
+  }
+
+  .tp-cat-card:hover h3 {
+    color: #e02424;
+  }
+
+  .tp-cat-card-hint {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-bottom: 12px;
+    transition: color 0.2s;
+  }
+
+  .tp-cat-card:hover .tp-cat-card-hint {
+    color: #e02424;
+  }
+
+  .tp-cat-card-bottom {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid #f3f4f6;
+  }
+
+  .tp-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .tp-price-label {
+    display: block;
+    font-size: 10.5px;
+    color: #70757d;
+  }
+
+  .tp-cat-card-price {
+    font-size: 17px;
+    font-weight: 900;
+    color: #111111;
+  }
+
+  .tp-stock-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #059669;
+  }
+
+  .tp-stock-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+  }
+
+  .tp-cat-card-btn {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #111111;
+    color: #ffffff !important;
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .tp-cat-card:hover .tp-cat-card-btn {
+    background: #e02424;
+  }
+
+  /* Load more */
+  .tp-load-more-wrap {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .tp-load-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 2px solid #111111;
+    color: #111111;
+    padding: 13px 32px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tp-load-more-btn:hover {
+    background: #111111;
+    color: #ffffff;
+    transform: translateY(-2px);
+  }
+
+  /* Modal Quick View */
+  .tp-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .tp-modal-box {
+    background: #ffffff;
+    border-radius: 28px;
+    width: 100%;
+    max-width: 580px;
+    position: relative;
+    padding: 28px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .tp-modal-close {
+    position: absolute;
+    right: 18px;
+    top: 18px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 10;
+  }
+
+  .tp-modal-close:hover {
+    background: #e5e7eb;
+  }
+
+  .tp-modal-img {
+    height: 270px;
+    background: #fafafa;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    border: 1px solid #f3f4f6;
+    padding: 16px;
+  }
+
+  .tp-modal-img img {
+    max-height: 230px;
+    max-width: 90%;
+    object-fit: contain;
+  }
+
+  @media (max-width: 1024px) {
+    .tp-catalog-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .tp-catalog-hero {
+      flex-direction: column;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .tp-catalog-hero-text {
+      max-width: 100%;
+    }
+    .tp-catalog-hero-text h1 {
+      font-size: 34px;
+    }
+    .tp-catalog-hero-preview {
+      width: 100%;
+      height: 210px;
+    }
+    .tp-hero-phone-img {
+      max-height: 190px;
+    }
+    .tp-catalog-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .tp-cat-card {
+      padding: 12px;
+      min-height: 360px;
+    }
+    .tp-cat-card-img-wrap {
+      height: 145px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .tp-catalog-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    var rawItems = [];
+    var categories = [
+      "Todos",
+      "Celulares",
+      "Combos",
+      "Sonido y Audio",
+      "Audifonos y Diademas",
+      "Gaming y TV Box",
+      "Smartwatch y Relojes",
+      "Cargadores y Energía",
+      "Cables y Conectividad",
+      "Cómputo y Accesorios",
+      "POS y Oficina",
+      "Accesorios y Varios"
+    ];
+
+    var currentCategory = "Todos";
+    var currentSearch = "";
+    var currentSort = "featured";
+    var pageSize = 24;
+    var visibleLimit = pageSize;
+
+    function normalizeText(text) {
+      if (!text) return "";
+      return text
+        .toString()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function tokenizeQuery(query) {
+      var norm = normalizeText(query);
+      if (!norm) return [];
+      return norm.split(" ").filter(function(t) { return t.length > 0; });
+    }
+
+    function matchCategory(itemCat, targetCat) {
+      if (targetCat === "Todos") return true;
+      var n1 = normalizeText(itemCat);
+      var n2 = normalizeText(targetCat);
+      return n1 === n2;
+    }
+
+    var defaultFallbackImg = "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/smartwatch.jpg?v=1791928273";
+
+    function formatCop(num) {
+      if (!num) return "$ 0";
+      return "$ " + Number(num).toLocaleString("es-CO");
+    }
+
+    function getFallback(cat, name) {
+      var c = normalizeText(cat || "");
+      var n = normalizeText(name || "");
+
+      // 1. CARGADORES Y ENERGIA
+      if (
+        c.indexOf("cargador") !== -1 ||
+        c.indexOf("energ") !== -1 ||
+        n.indexOf("cargador") !== -1 ||
+        n.indexOf("adaptador") !== -1 ||
+        n.indexOf("fuente") !== -1 ||
+        n.indexOf("bateria") !== -1
+      ) {
+        if (n.indexOf("lenovo") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/lenovo_slimtip.jpg?v=1791928267";
+        if (n.indexOf("hp") !== -1) {
+          if (n.indexOf("azul") !== -1 || n.indexOf("3 33a") !== -1 || n.indexOf("2 31a") !== -1) {
+            return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/hp_punta_azul.jpg?v=1791928268";
+          }
+          return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/hp_estandar.jpg?v=1791928271";
+        }
+        if (n.indexOf("dell") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/dell_pa12.jpg?v=1791928271";
+        if (n.indexOf("asus") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/asus_19v.jpg?v=1791928270";
+        if (n.indexOf("acer") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/acer_19v.png?v=1791928271";
+        if (n.indexOf("apple") !== -1 || n.indexOf("macbook") !== -1) {
+          if (n.indexOf("magsafe 2") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/apple_magsafe2.jpg?v=1791928267";
+          if (n.indexOf("magsafe") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/apple_magsafe1.jpg?v=1791928267";
+          if (n.indexOf("61w") !== -1 || n.indexOf("tipo c") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/apple_usbc_61w.jpg?v=1791928268";
+          return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/apple_usbc_20w.jpg?v=1791928268";
+        }
+        if (n.indexOf("samsung") !== -1) {
+          if (n.indexOf("19v") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/samsung_laptop.jpg?v=1791928268";
+          return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/samsung_25w.png?v=1791928272";
+        }
+        if (n.indexOf("monitor") !== -1 || n.indexOf("lg") !== -1) {
+          if (n.indexOf("3a") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/lg_monitor_3a.jpg?v=1791928269";
+          return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/lg_monitor_5a.jpg?v=1791928268";
+        }
+        if (n.indexOf("motorola") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/motorola_turbopower.png?v=1791928271";
+        if (n.indexOf("xiaomi") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/xiaomi_67w.png?v=1791928268";
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/apple_usbc_20w.jpg?v=1791928268";
+      }
+
+      // 2. CABLES Y CONECTIVIDAD
+      if (c.indexOf("cable") !== -1 || n.indexOf("cable") !== -1 || n.indexOf("otg") !== -1 || n.indexOf("hdmi") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/cable_usbc.png?v=1791928271";
+      }
+
+      // 3. AUDIFONOS Y SONIDO
+      if (c.indexOf("audio") !== -1 || c.indexOf("audifono") !== -1 || c.indexOf("diadema") !== -1 || n.indexOf("audifono") !== -1 || n.indexOf("diadema") !== -1 || n.indexOf("airpod") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/headphones.png?v=1791928274";
+      }
+      if (c.indexOf("sonido") !== -1 || n.indexOf("parlante") !== -1 || n.indexOf("cabina") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/parlante_rgb.png?v=1791928275";
+      }
+
+      // 4. SMARTWATCH
+      if (c.indexOf("reloj") !== -1 || c.indexOf("smartwatch") !== -1 || n.indexOf("reloj") !== -1 || n.indexOf("watch") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/redmi_watch5.webp?v=1791928268";
+      }
+
+      // 5. GAMING
+      if (c.indexOf("gaming") !== -1 || n.indexOf("juego") !== -1 || n.indexOf("consola") !== -1 || n.indexOf("stick") !== -1 || n.indexOf("tv box") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/gamestick_4k.png?v=1791928275";
+      }
+
+      // 6. COMPUTO
+      if (c.indexOf("computo") !== -1 || n.indexOf("portatil") !== -1 || n.indexOf("laptop") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/lenovo.png?v=1791928275";
+      }
+
+      // 7. CELULARES
+      if (c.indexOf("celular") !== -1 || n.indexOf("celular") !== -1 || n.indexOf("smartphone") !== -1 || n.indexOf("iphone") !== -1 || n.indexOf("samsung") !== -1 || n.indexOf("redmi") !== -1) {
+        if (n.indexOf("18 pro max") !== -1 || n.indexOf("18") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone18proax_nobg.png?v=1791928270";
+        if (n.indexOf("17 pro max") !== -1 || n.indexOf("17") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/iphone17promax.webp?v=1791928268";
+        if (n.indexOf("16 pro max") !== -1 || n.indexOf("16") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone16promax.webp?v=1791928266";
+        if (n.indexOf("redmi") !== -1 || n.indexOf("note 15") !== -1 || n.indexOf("note 13") !== -1 || n.indexOf("xiaomi") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/redmi_note13_pro.png?v=1791928270";
+        if (n.indexOf("s26") !== -1 || n.indexOf("samsung") !== -1 || n.indexOf("s24") !== -1) return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/samsung_s24_ultra.png?v=1791928269";
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/samsung_s24_ultra.png?v=1791928269";
+      }
+
+      return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/smartwatch.jpg?v=1791928273";
+    }
+
+    var ASSET_MAP = {
+      "phone18proax.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone18proax.webp?v=1791928266",
+      "phone18proax_nobg.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone18proax_nobg.png?v=1791928270",
+      "iphone17promax.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/iphone17promax.webp?v=1791928268",
+      "phone16promax.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone16promax.webp?v=1791928266",
+      "iphone16_desert.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/iphone16_desert.png?v=1791928269",
+      "iphone-16-pro-max.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/iphone-16-pro-max.png?v=1791928268",
+      "samsung_s24_ultra.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/samsung_s24_ultra.png?v=1791928269",
+      "samsung s26 ultra.jpg": "{{ 'samsung s26 ultra.jpg' | asset_url }}",
+      "redmi_note13_pro.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/redmi_note13_pro.png?v=1791928270",
+      "reminote15pro.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/reminote15pro.png?v=1791928270",
+      "lenovo.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/lenovo.png?v=1791928275",
+      "gamestick_4k.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/gamestick_4k.png?v=1791928275",
+      "redmi_watch5.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/redmi_watch5.webp?v=1791928268",
+      "headphones.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/headphones.png?v=1791928274",
+      "cable_usbc.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/cable_usbc.png?v=1791928271",
+      "parlante_rgb.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/parlante_rgb.png?v=1791928275",
+      "combo-forro-vidrio-samsung.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-forro-vidrio-samsung.png?v=1791928273",
+      "forro_mas_vidrio_samsung.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/forro_mas_vidrio_samsung.png?v=1791928273",
+      "forro%20mas%20vidrio%20samsung.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/forro_mas_vidrio_samsung.png?v=1791928273",
+      "combo-forro-vidrio-redmi15c.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-forro-vidrio-redmi15c.jpg?v=1791928273",
+      "combo-forro-vidrio-xiaomi.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-forro-vidrio-xiaomi.png?v=1791928270",
+      "forro_mas_vidrio_xiaomi.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/forro_mas_vidrio_xiaomi.png?v=1791928270",
+      "forro%20mas%20vidrio%20xiaomi.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/forro_mas_vidrio_xiaomi.png?v=1791928270",
+      "combo-samsung-a07-forro-silicona-vidrio.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-samsung-a07-forro-silicona-vidrio.jpg?v=1791928272",
+      "combo-forro-vidrio-samsung-a07.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-forro-vidrio-samsung-a07.jpg?v=1791928272",
+      "combo samsung.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo_samsung.webp?v=1791928267",
+      "combo%20samsung.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo_samsung.webp?v=1791928267",
+      "combo-motorola-g77-pad60.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-motorola-g77-pad60.webp?v=1791928267",
+      "combo-oppo-a6-reloj-parlante.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-oppo-a6-reloj-parlante.jpg?v=1791928273",
+      "combo-samsung-s25fe-watch.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-samsung-s25fe-watch.webp?v=1791928267",
+      "combo-vivo-v60lite-buds-reloj.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-vivo-v60lite-buds-reloj.jpg?v=1791928273",
+      "vidrio-templado-celular.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/vidrio-templado-celular.jpg?v=1791928273",
+      "vidrio-antiespia-celular.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/vidrio-antiespia-celular.jpg?v=1791928273",
+      "bateria-9v-tronex.png": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/bateria-9v-tronex.png?v=1791928271",
+      "bateria-aaa-tronex.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/bateria-aaa-tronex.jpg?v=1791928269",
+      "bateria-iph-13-pro.jpg": "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/bateria-iph-13-pro.jpg?v=1791928269"
+    };
+
+    function resolveSingleUrl(str) {
+      if (!str) return "";
+      if (str.indexOf("http://") === 0 || str.indexOf("https://") === 0 || str.indexOf("//") === 0) {
+        return str;
+      }
+      var clean = str.split("?")[0];
+      var rawFilename = clean.split("/").pop();
+      if (!rawFilename) return "";
+      if (ASSET_MAP[rawFilename]) return ASSET_MAP[rawFilename];
+      try {
+        var decoded = decodeURIComponent(rawFilename);
+        if (ASSET_MAP[decoded]) return ASSET_MAP[decoded];
+      } catch(e) {}
+      return "";
+    }
+
+    function resolveItemImage(item) {
+      var code = (item.code || "").toUpperCase();
+      var nameUpper = (item.name || "").toUpperCase();
+      if (code === "9081" || item.id === "bateria-iph-13-pro-9081" || nameUpper.indexOf("BATERIA IPH 13 PRO") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/bateria-iph-13-pro.jpg?v=1791928269";
+      }
+      if (code === "515" || item.id === "bateria-9v-tronex-515" || nameUpper.indexOf("BATERIA 9V TRONEX") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/bateria-9v-tronex.png?v=1791928271";
+      }
+      if (code === "R03" || item.id === "bateria-triple-aaa-tronex-r03" || nameUpper.indexOf("BATERIA TRIPLE AAA TRONEX") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/bateria-aaa-tronex.jpg?v=1791928269";
+      }
+      if (code === "CMB-ACC-01" || (code.indexOf("S25") !== -1 && item.category === "Combos")) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-forro-vidrio-samsung.png?v=1791928273";
+      }
+      if (code === "CMB-REDMI15C-01" || (code.indexOf("REDMI") !== -1 && item.category === "Combos")) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-forro-vidrio-redmi15c.jpg?v=1791928273";
+      }
+      if (code === "CMB-SAMS-A07-01" || (code.indexOf("A07") !== -1 && item.category === "Combos")) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/combo-samsung-a07-forro-silicona-vidrio.jpg?v=1791928272";
+      }
+      if (code === "9126" || item.id === "vidrios-templados-9126" || nameUpper.indexOf("VIDRIOS TEMPLADOS") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/vidrio-templado-celular.jpg?v=1791928273";
+      }
+      if (code === "9139" || item.id === "vidrios-antiespia-9139" || nameUpper.indexOf("VIDRIOS ANTIESPIA") !== -1 || nameUpper.indexOf("VIDRIOS ANTIESPÍA") !== -1) {
+        return "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/vidrio-antiespia-celular.jpg?v=1791928273";
+      }
+
+      var direct = resolveSingleUrl(item.image);
+      if (direct) return direct;
+
+      if (item.images && item.images.length > 0) {
+        for (var i = 0; i < item.images.length; i++) {
+          var matched = resolveSingleUrl(item.images[i]);
+          if (matched) return matched;
+        }
+      }
+
+      return getFallback(item.category, item.name);
+    }
+
+    function renderTabs() {
+      var tabsContainer = document.getElementById("cat-tabs-bar");
+      if (!tabsContainer) return;
+      tabsContainer.innerHTML = "";
+
+      categories.forEach(function(cat) {
+        var count = 0;
+        if (cat === "Todos") {
+          count = rawItems.length;
+        } else {
+          count = rawItems.filter(function(i) { return matchCategory(i.category, cat); }).length;
+        }
+
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "tp-cat-tab" + (cat === currentCategory ? " active" : "");
+        btn.innerHTML = '<span>' + cat + '</span><span class="tp-cat-tab-badge">' + count + '</span>';
+        btn.onclick = function() {
+          currentCategory = cat;
+          visibleLimit = pageSize;
+          renderTabs();
+          renderProducts();
+        };
+        tabsContainer.appendChild(btn);
+      });
+    }
+
+    function filterAndSort() {
+      var tokens = tokenizeQuery(currentSearch);
+      var filtered = rawItems.filter(function(item) {
+        // Filter by category
+        if (currentCategory !== "Todos" && !matchCategory(item.category, currentCategory)) {
+          return false;
+        }
+        // Filter by search tokens
+        if (tokens.length > 0) {
+          var haystack = normalizeText(
+            (item.name || "") + " " + (item.code || "") + " " + (item.category || "") + " " + (item.description || "")
+          );
+          for (var i = 0; i < tokens.length; i++) {
+            if (haystack.indexOf(tokens[i]) === -1) {
+              return false;
+            }
+          }
+        }
+        return true;
+      });
+
+      // Sort
+      if (currentSort === "price-asc") {
+        filtered.sort(function(a, b) { return a.price - b.price; });
+      } else if (currentSort === "price-desc") {
+        filtered.sort(function(a, b) { return b.price - a.price; });
+      } else if (currentSort === "name") {
+        filtered.sort(function(a, b) { return (a.name || "").localeCompare(b.name || ""); });
+      }
+
+      return filtered;
+    }
+
+    function renderProducts() {
+      var grid = document.getElementById("cat-products-grid");
+      var countText = document.getElementById("cat-count-text");
+      var loadMoreWrap = document.getElementById("cat-load-more-wrap");
+      var loadMoreText = document.getElementById("cat-load-more-text");
+      if (!grid) return;
+
+      var filtered = filterAndSort();
+      var visible = filtered.slice(0, visibleLimit);
+
+      if (countText) {
+        countText.innerHTML = "Mostrando <b>" + visible.length + "</b> de <b>" + filtered.length + "</b> productos" +
+          (currentCategory !== "Todos" ? " en <b>" + currentCategory + "</b>" : "");
+      }
+
+      grid.innerHTML = "";
+      if (visible.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 20px; border: 1px solid #e8e8ea;">' +
+          '<div style="font-size: 38px; margin-bottom: 10px;">🔍</div>' +
+          '<p style="font-size: 18px; font-weight: 800; color: #111; margin: 0 0 6px;">No se encontraron productos</p>' +
+          '<p style="font-size: 14px; color: #70757d; margin: 0 0 16px;">Intenta buscar con otra palabra clave o restablece los filtros.</p>' +
+          '<button type="button" onclick="clearSearch()" style="border-radius: 999px; background: #111; color: #fff; border: none; padding: 9px 22px; font-weight: 700; cursor: pointer;">Restablecer filtros</button>' +
+          '</div>';
+        if (loadMoreWrap) loadMoreWrap.style.display = "none";
+        return;
+      }
+
+      visible.forEach(function(item) {
+        var card = document.createElement("div");
+        card.className = "tp-cat-card";
+
+        var imgUrl = resolveItemImage(item);
+
+        var badgeHtml = item.badge ? '<span class="tp-card-badge">' + item.badge + '</span>' : '';
+        var stockHtml = item.stock > 0 ? '<span class="tp-stock-tag"><span class="tp-stock-dot"></span>' + item.stock + ' disponibles</span>' : '';
+        var btnText = item.badge === "Preventa" ? "Apartar Preventa" : "Añadir al carrito";
+
+        card.innerHTML =
+          '<div>' +
+            '<div class="tp-cat-card-top">' +
+              '<span class="tp-cat-card-category">' + (item.category || "General") + '</span>' +
+              '<span class="tp-cat-card-code">Cód: ' + (item.code || item.id) + '</span>' +
+            '</div>' +
+            '<div class="tp-cat-card-img-wrap">' +
+              badgeHtml +
+              '<img src="' + imgUrl + '" alt="' + item.name + '" loading="lazy" onerror="this.src=\'' + defaultFallbackImg + '\'">' +
+            '</div>' +
+            '<h3>' + item.name + '</h3>' +
+            '<div class="tp-cat-card-hint"><span>👁️</span><span>Toca para ver descripción completa</span></div>' +
+          '</div>' +
+          '<div class="tp-cat-card-bottom">' +
+            '<div class="tp-price-row">' +
+              '<div>' +
+                '<span class="tp-price-label">Precio de venta:</span>' +
+                '<div class="tp-cat-card-price">' + formatCop(item.price) + '</div>' +
+              '</div>' +
+              stockHtml +
+            '</div>' +
+            '<button type="button" class="tp-cat-card-btn" onclick="event.stopPropagation(); window.handleCatalogItemAdd(this, \'' + (item.id || item.code) + '\')">' +
+              '<span>🛒 ' + btnText + '</span>' +
+              '<span>+</span>' +
+            '</button>' +
+          '</div>';
+
+        card.onclick = function() {
+          openModal(item, imgUrl);
+        };
+
+        grid.appendChild(card);
+      });
+
+      if (loadMoreWrap) {
+        var remaining = filtered.length - visibleLimit;
+        if (remaining > 0) {
+          loadMoreWrap.style.display = "flex";
+          if (loadMoreText) {
+            loadMoreText.textContent = "Cargar más productos (+" + Math.min(pageSize, remaining) + ")";
+          }
+        } else {
+          loadMoreWrap.style.display = "none";
+        }
+      }
+    }
+
+    window.loadMoreProducts = function() {
+      visibleLimit += pageSize;
+      renderProducts();
+    };
+
+    window.onSearchInput = function(val) {
+      currentSearch = val;
+      visibleLimit = pageSize;
+      var clearBtn = document.getElementById("cat-search-clear");
+      if (clearBtn) {
+        clearBtn.style.display = val ? "flex" : "none";
+      }
+      renderProducts();
+    };
+
+    window.clearSearch = function() {
+      var input = document.getElementById("cat-search-input");
+      if (input) input.value = "";
+      currentCategory = "Todos";
+      window.onSearchInput("");
+      renderTabs();
+    };
+
+    window.onSortChange = function(val) {
+      currentSort = val;
+      renderProducts();
+    };
+
+    var currentModalItem = null;
+    var currentModalImg = "";
+    var currentModalQty = 1;
+    var currentModalGlass = "none";
+    var currentModalGlassModel = "iPhone 16 Pro Max";
+    var isCurrentPhone = false;
+    var isCurrentVidrio = false;
+
+    function refreshModalPriceDisplay() {
+      if (!currentModalItem) return;
+      var basePrice = Number(currentModalItem.price) || 0;
+      var glassExtra = (isCurrentPhone && (currentModalGlass === "templado" || currentModalGlass === "antiespia")) ? 10000 : 0;
+      var unitPrice = basePrice + glassExtra;
+      var grandTotal = unitPrice * currentModalQty;
+
+      var totalDisplay = document.getElementById("tp-modal-total-display");
+      if (totalDisplay) totalDisplay.textContent = formatCop(grandTotal);
+
+      var btnText = document.getElementById("tp-modal-btn-label");
+      if (btnText) {
+        btnText.textContent = "🛒 Añadir al carrito • " + formatCop(grandTotal);
+      }
+    }
+
+    window.adjustModalQty = function(delta) {
+      if (!currentModalItem) return;
+      var newQ = currentModalQty + delta;
+      if (newQ < 1) newQ = 1;
+      var maxStock = currentModalItem.stock > 0 ? currentModalItem.stock : 99;
+      if (newQ > maxStock) newQ = maxStock;
+      currentModalQty = newQ;
+      var qEl = document.getElementById("tp-modal-qty-val");
+      if (qEl) qEl.textContent = currentModalQty;
+      refreshModalPriceDisplay();
+    };
+
+    window.setModalGlassChoice = function(val) {
+      currentModalGlass = val;
+      refreshModalPriceDisplay();
+    };
+
+    window.setModalGlassModel = function(val) {
+      currentModalGlassModel = val;
+    };
+
+    // Añadir producto(s) desde el modal al carrito sin borrar los anteriores
+    window.proceedModalAddToCart = function(openDrawer) {
+      if (!currentModalItem) return;
+      var itemsToBuy = [];
+      var qty = currentModalQty;
+
+      if (isCurrentVidrio) {
+        var modelSelect = document.getElementById("tp-glass-model-select");
+        var selectedModel = modelSelect ? modelSelect.value : currentModalGlassModel;
+        itemsToBuy.push({
+          id: (currentModalItem.id || currentModalItem.code) + "-" + selectedModel.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+          title: currentModalItem.name + " (" + selectedModel + ")",
+          price: currentModalItem.price,
+          image: currentModalImg,
+          quantity: qty
+        });
+      } else {
+        itemsToBuy.push({
+          id: currentModalItem.id || currentModalItem.code,
+          title: currentModalItem.name,
+          price: currentModalItem.price,
+          image: currentModalImg,
+          quantity: qty
+        });
+
+        if (isCurrentPhone && (currentModalGlass === "templado" || currentModalGlass === "antiespia")) {
+          var isAnti = currentModalGlass === "antiespia";
+          itemsToBuy.push({
+            id: isAnti ? "vidrios-antiespia-9139" : "vidrios-templados-9126",
+            title: (isAnti ? "🔒 Vidrio Antiespía Privacy 9D" : "🛡️ Vidrio Templado 9D HD") + " (para " + currentModalItem.name + ")",
+            price: 10000,
+            image: isAnti ? "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/vidrio-antiespia-celular.jpg?v=1791928273" : "https://cdn.shopify.com/s/files/1/0667/5903/2972/files/vidrio-templado-celular.jpg?v=1791928273",
+            quantity: qty
+          });
+        }
+      }
+
+      window.closeModal();
+      if (window.addToCheckout) {
+        window.addToCheckout(itemsToBuy, { openDrawer: !!openDrawer });
+      } else if (window.openCheckout) {
+        window.openCheckout(itemsToBuy);
+      }
+    };
+
+    window.proceedModalCheckout = function() {
+      window.proceedModalAddToCart(true);
+    };
+
+    // Agregar producto rápido desde la tarjeta del catálogo
+    window.handleCatalogItemAdd = function(btn, itemId) {
+      if (!rawItems || !itemId) return;
+      var found = rawItems.find(function(it) {
+        return (it.id === itemId) || (it.code === itemId);
+      });
+      if (!found) return;
+
+      var nameNorm = (found.name || "").toUpperCase();
+      var isVidrio = (found.code === "9126" || found.code === "9139" || nameNorm.indexOf("VIDRIOS TEMPLADOS") !== -1 || nameNorm.indexOf("VIDRIOS ANTIESPIA") !== -1 || nameNorm.indexOf("VIDRIOS ANTIESPÍA") !== -1);
+
+      // Si requiere modelo de teléfono (vidrios), abrir modal para selección precisa
+      if (isVidrio) {
+        openModal(found, resolveItemImage(found));
+        return;
+      }
+
+      var origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span>✓ Agregado</span><span>🛒</span>';
+      btn.style.background = '#16a34a';
+
+      var itemPayload = {
+        id: found.id || found.code,
+        title: found.name,
+        price: found.price,
+        image: resolveItemImage(found),
+        quantity: 1
+      };
+
+      if (window.addToCheckout) {
+        window.addToCheckout(itemPayload, { openDrawer: false });
+      } else if (window.openCheckout) {
+        window.openCheckout(itemPayload);
+      }
+
+      setTimeout(function() {
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+        btn.style.background = '';
+      }, 1800);
+    };
+
+    window.openModal = function(item, imgUrl) {
+      var modal = document.getElementById("tp-product-modal");
+      var content = document.getElementById("modal-content");
+      if (!modal || !content) return;
+
+      currentModalItem = item;
+      currentModalImg = imgUrl;
+      currentModalQty = 1;
+      currentModalGlass = "none";
+      currentModalGlassModel = "iPhone 16 Pro Max";
+
+      var nameNorm = (item.name || "").toUpperCase();
+      isCurrentPhone = (item.category === "Celulares") || (nameNorm.indexOf("IPHONE") !== -1 || nameNorm.indexOf("SAMSUNG GALAXY S") !== -1 || nameNorm.indexOf("REDMI") !== -1) && nameNorm.indexOf("COMBO") === -1 && nameNorm.indexOf("CARGADOR") === -1 && nameNorm.indexOf("VIDRIO") === -1 && nameNorm.indexOf("FORRO") === -1 && nameNorm.indexOf("CABLE") === -1;
+      isCurrentVidrio = (item.code === "9126" || item.code === "9139" || nameNorm.indexOf("VIDRIOS TEMPLADOS") !== -1 || nameNorm.indexOf("VIDRIOS ANTIESPIA") !== -1 || nameNorm.indexOf("VIDRIOS ANTIESPÍA") !== -1);
+
+      var badgeHtml = item.badge ? '<span class="tp-card-badge" style="position: static; margin-left: 6px;">' + item.badge + '</span>' : '';
+
+      var rawPhotos = (item.images && item.images.length > 0) ? item.images : [imgUrl];
+      var photosList = rawPhotos.map(function(p) {
+        return resolveSingleUrl(p) || p;
+      }).filter(function(u) {
+        return u && (u.indexOf("http") === 0 || u.indexOf("//") === 0 || u.indexOf("cdn.shopify.com") !== -1 || u.indexOf("/cdn/") !== -1);
+      });
+      if (photosList.length === 0) photosList = [imgUrl];
+
+      var thumbsHtml = '';
+      if (photosList.length > 1) {
+        thumbsHtml = '<div class="tp-modal-thumbs" style="display: flex; gap: 8px; justify-content: center; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; max-width: 100%;">';
+        photosList.forEach(function(pUrl, idx) {
+          thumbsHtml += '<img src="' + pUrl + '" alt="Vista ' + (idx + 1) + '" style="width: 48px; height: 48px; object-fit: contain; border-radius: 8px; border: 2px solid ' + (idx === 0 ? '#e02424' : '#e5e7eb') + '; cursor: pointer; background: #fff; padding: 2px;" onclick="document.getElementById(\'tp-modal-main-img\').src=\'' + pUrl + '\'; this.parentElement.querySelectorAll(\'img\').forEach(function(el){ el.style.borderColor=\'#e5e7eb\'; }); this.style.borderColor=\'#e02424\';">';
+        });
+        thumbsHtml += '</div>';
+      }
+
+      var formattedDesc = (item.description || 'Producto 100% original con garantía oficial de Tecno+ y despacho rápido de 24 a 48 horas a toda Colombia.')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+
+      // Selector de vidrio para celulares
+      var glassSelectionHtml = '';
+      if (isCurrentPhone) {
+        glassSelectionHtml =
+          '<div style="margin-bottom: 16px; background: #fff5f5; border: 1.5px solid #fecaca; border-radius: 16px; padding: 14px;">' +
+            '<div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">' +
+              '<span style="font-size: 16px;">🛡️</span>' +
+              '<span style="font-size: 12px; font-weight: 800; color: #991b1b; text-transform: uppercase;">¿Deseas incluir vidrio protector para este celular?</span>' +
+            '</div>' +
+            '<div style="display: flex; flex-direction: column; gap: 6px;">' +
+              '<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; background: #fff; padding: 8px 12px; border-radius: 10px; border: 1px solid #e5e7eb;">' +
+                '<input type="radio" name="tp-glass-choice" value="none" checked onchange="window.setModalGlassChoice(this.value)">' +
+                '<span>Sin vidrio adicional (solo el teléfono)</span>' +
+              '</label>' +
+              '<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #111; cursor: pointer; background: #fff; padding: 8px 12px; border-radius: 10px; border: 1px solid #e5e7eb;">' +
+                '<input type="radio" name="tp-glass-choice" value="templado" onchange="window.setModalGlassChoice(this.value)">' +
+                '<span>🛡️ Vidrio Templado 9D HD (+ $10.000 COP)</span>' +
+              '</label>' +
+              '<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #111; cursor: pointer; background: #fff; padding: 8px 12px; border-radius: 10px; border: 1px solid #e5e7eb;">' +
+                '<input type="radio" name="tp-glass-choice" value="antiespia" onchange="window.setModalGlassChoice(this.value)">' +
+                '<span>🔒 Vidrio Antiespía Privacy 9D (+ $10.000 COP)</span>' +
+              '</label>' +
+            '</div>' +
+          '</div>';
+      }
+
+      // Selector de modelo para productos de Vidrios
+      var glassModelHtml = '';
+      if (isCurrentVidrio) {
+        glassModelHtml =
+          '<div style="margin-bottom: 16px; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 16px; padding: 14px;">' +
+            '<div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">' +
+              '<span style="font-size: 16px;">📱</span>' +
+              '<span style="font-size: 12px; font-weight: 800; color: #166534; text-transform: uppercase;">Selecciona el modelo de celular para tu vidrio:</span>' +
+            '</div>' +
+            '<select id="tp-glass-model-select" onchange="window.setModalGlassModel(this.value)" style="width: 100%; border: 1.5px solid #86efac; border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 700; background: #fff; color: #111; outline: none;">' +
+              '<optgroup label="Apple / iPhone">' +
+                '<option value="iPhone 18 Pro Max">iPhone 18 Pro Max</option>' +
+                '<option value="iPhone 17 Pro Max">iPhone 17 Pro Max</option>' +
+                '<option value="iPhone 16 Pro Max" selected>iPhone 16 Pro Max</option>' +
+                '<option value="iPhone 16 Pro">iPhone 16 Pro</option>' +
+                '<option value="iPhone 16 / 16 Plus">iPhone 16 / 16 Plus</option>' +
+                '<option value="iPhone 15 Pro Max">iPhone 15 Pro Max</option>' +
+                '<option value="iPhone 15 Pro / 15">iPhone 15 / 15 Pro</option>' +
+                '<option value="iPhone 14 / 14 Pro Max">iPhone 14 / 14 Pro Max</option>' +
+                '<option value="iPhone 13 / 13 Pro Max">iPhone 13 / 13 Pro Max</option>' +
+                '<option value="iPhone 11 / 12">iPhone 11 / 12</option>' +
+              '</optgroup>' +
+              '<optgroup label="Samsung Galaxy">' +
+                '<option value="Samsung Galaxy S26 Ultra">Samsung Galaxy S26 Ultra</option>' +
+                '<option value="Samsung Galaxy S25 Ultra">Samsung Galaxy S25 Ultra</option>' +
+                '<option value="Samsung Galaxy S25 FE">Samsung Galaxy S25 FE</option>' +
+                '<option value="Samsung Galaxy S24 Ultra">Samsung Galaxy S24 Ultra</option>' +
+                '<option value="Samsung Galaxy S23 Ultra">Samsung Galaxy S23 Ultra</option>' +
+                '<option value="Samsung Galaxy A55 5G">Samsung Galaxy A55 5G</option>' +
+                '<option value="Samsung Galaxy A35 / A25">Samsung Galaxy A35 / A25</option>' +
+                '<option value="Samsung Galaxy A15 / A07">Samsung Galaxy A15 / A07</option>' +
+                '<option value="Samsung Galaxy A06 / A05s">Samsung Galaxy A06 / A05s</option>' +
+              '</optgroup>' +
+              '<optgroup label="Xiaomi / Redmi / POCO">' +
+                '<option value="Redmi Note 15 Pro">Redmi Note 15 Pro</option>' +
+                '<option value="Redmi 15C">Redmi 15C</option>' +
+                '<option value="Redmi Note 13 Pro+ / Pro">Redmi Note 13 Pro+ / Pro</option>' +
+                '<option value="Redmi 13C">Redmi 13C</option>' +
+                '<option value="POCO X6 Pro / F6">POCO X6 Pro / F6</option>' +
+                '<option value="Xiaomi 14 Ultra / 14">Xiaomi 14 Ultra / 14</option>' +
+              '</optgroup>' +
+              '<optgroup label="Otras Marcas Compatibles">' +
+                '<option value="Motorola Moto G85 / Edge 50">Motorola Moto G85 / Edge 50</option>' +
+                '<option value="Honor 200 / Magic 6 Lite">Honor 200 / Magic 6 Lite</option>' +
+                '<option value="Infinix Note 40 / Hot 40">Infinix Note 40 / Hot 40</option>' +
+                '<option value="Vivo V60 Lite / V40">Vivo V60 Lite / V40</option>' +
+                '<option value="Otro modelo de celular">Otro modelo (indicar en notas)</option>' +
+              '</optgroup>' +
+            '</select>' +
+          '</div>';
+      }
+
+      content.innerHTML =
+        '<div class="tp-cat-card-top" style="margin-bottom: 16px; padding-right: 36px;">' +
+          '<div style="display: flex; align-items: center; gap: 6px;">' +
+            '<span class="tp-cat-card-category">' + item.category + '</span>' +
+            badgeHtml +
+          '</div>' +
+          '<span class="tp-cat-card-code">Cód: ' + item.code + '</span>' +
+        '</div>' +
+        '<div class="tp-modal-img" style="display: flex; flex-direction: column; align-items: center;">' +
+          '<img id="tp-modal-main-img" src="' + imgUrl + '" alt="' + item.name + '" style="max-height: 280px; object-fit: contain;">' +
+          thumbsHtml +
+        '</div>' +
+        '<h2 style="font-size: 21px; font-weight: 800; margin: 14px 0 10px; line-height: 1.3; color: #111;">' + item.name + '</h2>' +
+        '<div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px;">' +
+          '<div style="font-size: 26px; font-weight: 900; color: #111;" id="tp-modal-total-display">' + formatCop(item.price) + '</div>' +
+          (item.stock > 0 ? '<span class="tp-stock-tag"><span class="tp-stock-dot"></span>' + item.stock + ' disponibles</span>' : '') +
+        '</div>' +
+
+        // Selector de Cantidad para TODOS los productos
+        '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; background: #f8f9fa; padding: 12px 16px; border-radius: 14px; border: 1px solid #e8e8ea;">' +
+          '<div>' +
+            '<div style="font-size: 13px; font-weight: 800; color: #111;">Cantidad a comprar</div>' +
+            '<div style="font-size: 11px; color: #6b7280;">' + (item.stock > 0 ? 'Hasta ' + item.stock + ' unidades disponibles' : 'Entrega garantizada') + '</div>' +
+          '</div>' +
+          '<div style="display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid #d1d5db; border-radius: 10px; background: #fff; padding: 2px;">' +
+            '<button type="button" onclick="window.adjustModalQty(-1)" style="width: 32px; height: 32px; border: none; background: #f3f4f6; border-radius: 8px; font-size: 16px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>' +
+            '<span id="tp-modal-qty-val" style="font-size: 14px; font-weight: 900; min-width: 28px; text-align: center;">1</span>' +
+            '<button type="button" onclick="window.adjustModalQty(1)" style="width: 32px; height: 32px; border: none; background: #f3f4f6; border-radius: 8px; font-size: 16px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>' +
+          '</div>' +
+        '</div>' +
+
+        glassSelectionHtml +
+        glassModelHtml +
+
+        '<div style="background: #f8f9fa; border-radius: 14px; padding: 14px 16px; margin-bottom: 22px; border: 1px solid #e8e8ea; max-height: 200px; overflow-y: auto;">' +
+          '<div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #70757d; margin-bottom: 8px;">Descripción y Especificaciones</div>' +
+          '<p style="font-size: 13px; color: #4b5563; line-height: 1.6; margin: 0;">' + formattedDesc + '</p>' +
+        '</div>' +
+
+        '<div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">' +
+          '<button type="button" class="tp-cat-card-btn" style="text-align: center; justify-content: center; font-size: 14.5px; padding: 14px 24px; text-decoration: none; background: #e02424; cursor: pointer; border: none; width: 100%; border-radius: 12px;" onclick="window.proceedModalAddToCart(true)">' +
+            '<span id="tp-modal-btn-label">🛒 Añadir al carrito • ' + formatCop(item.price) + '</span>' +
+            '<span style="margin-left: 8px;">+</span>' +
+          '</button>' +
+          '<button type="button" style="text-align: center; justify-content: center; font-size: 13px; font-weight: 700; padding: 10px 18px; color: #4b5563; background: #f3f4f6; border: 1px solid #e5e7eb; cursor: pointer; border-radius: 10px;" onclick="window.closeModal()">' +
+            '← Seguir viendo más productos' +
+          '</button>' +
+        '</div>';
+
+      modal.style.display = "flex";
+      document.body.style.overflow = "hidden";
+      refreshModalPriceDisplay();
+    };
+
+    window.closeModal = function(e) {
+      if (e && e.target && e.target !== e.currentTarget && e.target.className !== "tp-modal-close") {
+        return;
+      }
+      var modal = document.getElementById("tp-product-modal");
+      if (modal) modal.style.display = "none";
+      document.body.style.overflow = "";
+    };
+
+    // Parse URL search query (e.g. ?categoria=Celulares or ?q=cargador)
+    var urlParams = new URLSearchParams(window.location.search);
+    var urlCat = urlParams.get("categoria") || urlParams.get("category");
+    var urlQ = urlParams.get("q") || urlParams.get("search");
+
+    if (urlCat) {
+      currentCategory = urlCat;
+    }
+    if (urlQ) {
+      currentSearch = urlQ;
+      var inp = document.getElementById("cat-search-input");
+      if (inp) inp.value = urlQ;
+      var clearBtn = document.getElementById("cat-search-clear");
+      if (clearBtn) clearBtn.style.display = "flex";
+    }
+
+    // Load inventory JSON
+    fetch("{{ 'inventarioCompleto.json' | asset_url }}")
+      .then(function(res) {
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        return res.json();
+      })
+      .then(function(data) {
+        rawItems = data;
+        renderTabs();
+        renderProducts();
+      })
+      .catch(function(err) {
+        console.error("Error loading inventory", err);
+        var grid = document.getElementById("cat-products-grid");
+        if (grid) {
+          grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #e02424;">' +
+            '<p style="font-weight: 700;">Error al cargar el inventario. Por favor recarga la página.</p>' +
+            '</div>';
+        }
+      });
+  })();
+</script>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://esm.sh/three@0.170.0",
+    "three/": "https://esm.sh/three@0.170.0/",
+    "three/addons/": "https://esm.sh/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+  import * as THREE from 'https://esm.sh/three@0.170.0';
+  import { GLTFLoader } from 'https://esm.sh/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
+  import { DRACOLoader } from 'https://esm.sh/three@0.170.0/examples/jsm/loaders/DRACOLoader.js';
+
+  (function() {
+    var container = document.getElementById('tp-3d-canvas-wrap');
+    if (!container) return;
+
+    var loaderEl = document.getElementById('tp-3d-loader');
+    var indicatorsEl = document.getElementById('tp-3d-indicators');
+
+    function hideLoader() {
+      if (loaderEl && loaderEl.style.display !== 'none') {
+        loaderEl.style.opacity = '0';
+        setTimeout(function() {
+          if (loaderEl) loaderEl.style.display = 'none';
+        }, 400);
+      }
+    }
+
+    // Safety timeout: never leave user stuck waiting
+    setTimeout(hideLoader, 3500);
+
+    function isWebGLSupported() {
+      try {
+        var canvas = document.createElement('canvas');
+        return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+      } catch(e) {
+        return false;
+      }
+    }
+
+    if (!isWebGLSupported()) {
+      hideLoader();
+      return;
+    }
+
+    var MODELS = [
+      {
+        name: "iPhone 17 Pro Max",
+        tag: "Titanio",
+        url: "https://cdn.shopify.com/3d/models/7e6a34dc470913bd/apple_iphone_17_pro_max-v1.glb",
+        targetScale: 1.95
+      },
+      {
+        name: "iPhone Duo Fold 2026",
+        tag: "Star White",
+        url: "https://cdn.shopify.com/3d/models/b55d3b4df3dff883/apple_iphone_duo_fold_star_white_2026_animated-v1.glb",
+        targetScale: 1.85
+      },
+      {
+        name: "iPhone 18 Pro Max",
+        tag: "Next-Gen 2026",
+        url: "https://cdn.shopify.com/3d/models/585bfd95ec79a6b3/phone18-v1.glb",
+        targetScale: 1.95
+      }
+    ];
+
+    MODELS.forEach(function(m) {
+      if (m.url && m.url.indexOf('//') === 0) {
+        m.url = 'https:' + m.url;
+      }
+    });
+
+    var scene = new THREE.Scene();
+    var width = container.clientWidth || 320;
+    var height = container.clientHeight || 280;
+
+    var camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    camera.position.set(0, 0, 3.2);
+
+    var renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance"
+      });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.35;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      container.appendChild(renderer.domElement);
+    } catch(err) {
+      console.warn("WebGL renderer creation failed", err);
+      hideLoader();
+      return;
+    }
+
+    // Studio Lights
+    var ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+    scene.add(ambientLight);
+
+    var keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
+    keyLight.position.set(4, 5, 4);
+    scene.add(keyLight);
+
+    var fillLight = new THREE.DirectionalLight(0xf0f4f8, 1.8);
+    fillLight.position.set(-4, 2, 3);
+    scene.add(fillLight);
+
+    var rimLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    rimLight.position.set(0, 4, -4);
+    scene.add(rimLight);
+
+    var redAccentLight = new THREE.PointLight(0xe02424, 2.2, 10);
+    redAccentLight.position.set(2, -2, 1);
+    scene.add(redAccentLight);
+
+    // Slots & Pivots
+    var slots = MODELS.map(function(_, i) {
+      var pivot = new THREE.Group();
+      pivot.position.x = i === 0 ? 0 : 4.5;
+      pivot.visible = i === 0;
+      pivot.rotation.x = 0.12;
+      pivot.rotation.z = -0.04;
+      scene.add(pivot);
+      return {
+        pivot: pivot,
+        mixer: null,
+        loaded: false
+      };
+    });
+
+    var currentModelIndex = 0;
+    var activeModelIndex = 0;
+
+    // Loaders
+    var dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.7/");
+    dracoLoader.preload();
+
+    var gltfLoader = new GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+
+    function setupModel(gltf, idx, cfg) {
+      var model = gltf.scene;
+      var box = new THREE.Box3().setFromObject(model);
+      var center = box.getCenter(new THREE.Vector3());
+      var size = box.getSize(new THREE.Vector3());
+      var maxDim = Math.max(size.x, size.y, size.z);
+
+      var scale = cfg.targetScale / (maxDim || 1);
+      model.scale.set(scale, scale, scale);
+      model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+
+      model.traverse(function(child) {
+        if (child.isMesh && child.material) {
+          var mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach(function(m) {
+            if ("envMapIntensity" in m) m.envMapIntensity = 1.25;
+            m.needsUpdate = true;
+          });
+        }
+      });
+
+      if (gltf.animations && gltf.animations.length > 0) {
+        var mixer = new THREE.AnimationMixer(model);
+        var action = mixer.clipAction(gltf.animations[0]);
+        action.setLoop(THREE.LoopPingPong, Infinity);
+        action.play();
+        slots[idx].mixer = mixer;
+      }
+
+      slots[idx].pivot.add(model);
+      slots[idx].loaded = true;
+
+      // Hide loader once the initial or current model is ready
+      if (idx === 0 || idx === currentModelIndex) {
+        hideLoader();
+      }
+    }
+
+    MODELS.forEach(function(cfg, idx) {
+      gltfLoader.load(
+        cfg.url,
+        function(gltf) { setupModel(gltf, idx, cfg); },
+        undefined,
+        function(err) {
+          console.warn("Error loading 3D model " + cfg.name, err);
+          hideLoader();
+        }
+      );
+    });
+
+    // Render indicators
+    function renderIndicators() {
+      if (!indicatorsEl) return;
+      indicatorsEl.innerHTML = '';
+      MODELS.forEach(function(cfg, idx) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tp-3d-nav-btn' + (idx === activeModelIndex ? ' active' : '');
+        btn.title = cfg.name;
+        btn.innerHTML = '<span class="tp-3d-pill"></span>' + (idx === activeModelIndex ? '<span class="tp-3d-nav-label">' + cfg.name + '</span>' : '');
+        btn.onclick = function() {
+          startTransition(idx);
+          resetInterval();
+        };
+        indicatorsEl.appendChild(btn);
+      });
+    }
+
+    renderIndicators();
+
+    // Transitions
+    var transitionProgress = 1;
+    var isTransitioning = false;
+    var outgoingIndex = 0;
+    var incomingIndex = 0;
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function startTransition(toIndex) {
+      if (toIndex === currentModelIndex) return;
+
+      if (isTransitioning) {
+        slots[incomingIndex].pivot.position.x = 0;
+        slots[incomingIndex].pivot.scale.set(1, 1, 1);
+        slots[outgoingIndex].pivot.position.x = -4.0;
+        slots[outgoingIndex].pivot.visible = false;
+      }
+
+      isTransitioning = true;
+      transitionProgress = 0;
+      outgoingIndex = currentModelIndex;
+      incomingIndex = toIndex;
+      currentModelIndex = toIndex;
+      activeModelIndex = toIndex;
+      renderIndicators();
+
+      slots[incomingIndex].pivot.position.x = 4.0;
+      slots[incomingIndex].pivot.scale.set(0.75, 0.75, 0.75);
+      slots[incomingIndex].pivot.visible = true;
+    }
+
+    var intervalId = null;
+    function resetInterval() {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(function() {
+        var next = (currentModelIndex + 1) % MODELS.length;
+        startTransition(next);
+      }, 7000);
+    }
+    resetInterval();
+
+    // User drag rotation interaction
+    var isDragging = false;
+    var prevMouseX = 0;
+    container.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      prevMouseX = e.clientX;
+    });
+    window.addEventListener('mouseup', function() { isDragging = false; });
+    window.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      var deltaX = e.clientX - prevMouseX;
+      prevMouseX = e.clientX;
+      if (slots[currentModelIndex]) {
+        slots[currentModelIndex].pivot.rotation.y += deltaX * 0.015;
+      }
+    });
+
+    // Touch support
+    container.addEventListener('touchstart', function(e) {
+      if (e.touches && e.touches[0]) {
+        isDragging = true;
+        prevMouseX = e.touches[0].clientX;
+      }
+    }, { passive: true });
+    window.addEventListener('touchend', function() { isDragging = false; });
+    window.addEventListener('touchmove', function(e) {
+      if (!isDragging || !e.touches || !e.touches[0]) return;
+      var deltaX = e.touches[0].clientX - prevMouseX;
+      prevMouseX = e.touches[0].clientX;
+      if (slots[currentModelIndex]) {
+        slots[currentModelIndex].pivot.rotation.y += deltaX * 0.015;
+      }
+    }, { passive: true });
+
+    // Animation Loop
+    var lastTime = performance.now();
+    function animate() {
+      requestAnimationFrame(animate);
+      var now = performance.now();
+      var delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      slots.forEach(function(slot) {
+        if (slot.mixer) slot.mixer.update(delta);
+      });
+
+      if (isTransitioning) {
+        transitionProgress += delta * 1.1;
+        if (transitionProgress >= 1) {
+          transitionProgress = 1;
+          isTransitioning = false;
+          slots[incomingIndex].pivot.position.x = 0;
+          slots[incomingIndex].pivot.scale.set(1, 1, 1);
+          slots[outgoingIndex].pivot.position.x = -4.0;
+          slots[outgoingIndex].pivot.visible = false;
+        } else {
+          var eased = easeInOutCubic(transitionProgress);
+          slots[outgoingIndex].pivot.position.x = THREE.MathUtils.lerp(0, -4.0, eased);
+          var outScale = THREE.MathUtils.lerp(1, 0.75, eased);
+          slots[outgoingIndex].pivot.scale.set(outScale, outScale, outScale);
+
+          slots[incomingIndex].pivot.position.x = THREE.MathUtils.lerp(4.0, 0, eased);
+          var inScale = THREE.MathUtils.lerp(0.75, 1, eased);
+          slots[incomingIndex].pivot.scale.set(inScale, inScale, inScale);
+        }
+      }
+
+      // Continuous rotation on its own axis (if not dragging)
+      if (!isDragging) {
+        slots.forEach(function(slot, i) {
+          if (slot.pivot.visible || i === currentModelIndex) {
+            slot.pivot.rotation.y += 0.009;
+          }
+        });
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize
+    function onResize() {
+      if (!container || !renderer || !camera) return;
+      var w = container.clientWidth;
+      var h = container.clientHeight;
+      if (!w || !h) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Tecno+ Catálogo Completo",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Tecno+ Catálogo Completo"
+    }
+  ]
+}
+{% endschema %}
