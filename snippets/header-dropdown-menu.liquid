@@ -86,4 +86,86 @@
     background: #e02424;
     border-radius: 999px;
   }
+
+  .menu-drawer__navigation .menu-drawer__menu-item.tp-nav-active {
+    color: #e02424 !important;
+    font-weight: 700 !important;
+    background: #fff5f5;
+  }
+
+  #beneficios,
+  #celulares,
+  #gaming,
+  #combos,
+  #opiniones {
+    scroll-margin-top: 100px;
+  }
 </style>
+
+<script>
+  (() => {
+    const initializeSectionNavigation = () => {
+      const links = Array.from(document.querySelectorAll(
+        '.header__inline-menu a[href*="#"], .menu-drawer__navigation a[href*="#"]'
+      )).filter((link) => {
+        const url = new URL(link.href);
+        return url.pathname === window.location.pathname && url.hash;
+      });
+
+      const sections = Array.from(new Set(links
+        .map((link) => document.getElementById(new URL(link.href).hash.slice(1)))
+        .filter(Boolean)))
+        .sort((left, right) => {
+          if (left === right) return 0;
+          return left.compareDocumentPosition(right) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+        });
+
+      if (!sections.length) return;
+
+      const defaultSection = sections.find((section) => section.id === 'celulares') || sections[0];
+      const header = document.querySelector('.section-header');
+      let updateScheduled = false;
+
+      const updateActiveSection = () => {
+        updateScheduled = false;
+        const threshold = Math.max(
+          (header ? header.getBoundingClientRect().height : 0) + 16,
+          window.innerHeight * 0.28
+        );
+        let activeSection = defaultSection;
+
+        for (const section of sections) {
+          if (section.getBoundingClientRect().top > threshold) break;
+          activeSection = section;
+        }
+
+        links.forEach((link) => {
+          const isActive = new URL(link.href).hash.slice(1) === activeSection.id;
+          link.classList.toggle('tp-nav-active', isActive);
+          if (isActive) {
+            link.setAttribute('aria-current', 'location');
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        });
+      };
+
+      const scheduleUpdate = () => {
+        if (updateScheduled) return;
+        updateScheduled = true;
+        window.requestAnimationFrame(updateActiveSection);
+      };
+
+      window.addEventListener('scroll', scheduleUpdate, { passive: true });
+      window.addEventListener('resize', scheduleUpdate);
+      window.addEventListener('hashchange', scheduleUpdate);
+      updateActiveSection();
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeSectionNavigation, { once: true });
+    } else {
+      initializeSectionNavigation();
+    }
+  })();
+</script>
