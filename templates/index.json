@@ -24,6 +24,12 @@
         "sub_4": "Estamos en Montería para orientarte antes de elegir."
       }
     },
+    "tecno_mas_vendidos": {
+      "type": "tecno-bestsellers",
+      "settings": {
+        "products_to_show": 4
+      }
+    },
     "tecno_destacados": {
       "type": "tecno-featured-products",
       "settings": {
@@ -73,6 +79,7 @@
   "order": [
     "tecno_hero",
     "tecno_trust",
+    "tecno_mas_vendidos",
     "tecno_destacados",
     "tecno_gamer",
     "tecno_catalogo",

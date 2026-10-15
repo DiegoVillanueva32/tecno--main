@@ -44,11 +44,23 @@
 
 {% stylesheet %}
   .tp-trust-wrapper {
-    background: #ffffff;
+    position: relative;
+    background: linear-gradient(135deg, #fff8f8 0%, #ffffff 48%, #fff3f3 100%);
     width: 100%;
-    padding: 46px 0 52px;
+    padding: 68px 0 74px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
     scroll-margin-top: 100px;
+  }
+
+  .tp-trust-wrapper::before {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(1200px, calc(100% - 48px));
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #f3baba, transparent);
+    content: "";
+    transform: translateX(-50%);
   }
 
   .tp-trust-container {
@@ -57,88 +69,109 @@
   }
 
   .tp-trust-heading {
-    max-width: 620px;
-    margin: 0 auto 28px;
+    max-width: 680px;
+    margin: 0 auto 38px;
     text-align: center;
   }
 
   .tp-trust-heading > span {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 12px;
+    border: 1px solid #f5d2d2;
+    border-radius: 999px;
+    background: #ffffff;
     color: #e02424;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.14em;
+    box-shadow: 0 4px 12px rgba(224, 36, 36, 0.08);
   }
 
   .tp-trust-heading h2 {
     margin: 7px 0 8px;
     color: #111111;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 800;
+    font-size: clamp(28px, 3.4vw, 40px);
+    font-weight: 900;
     letter-spacing: -0.03em;
   }
 
   .tp-trust-heading p {
     margin: 0;
     color: #70757d;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
   }
 
   .tp-trust-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+    gap: 18px;
   }
 
   .tp-trust-item {
-    min-height: 168px;
-    padding: 22px 18px;
-    text-align: center;
-    border: 1px solid #eceef1;
-    border-radius: 18px;
-    background: #ffffff;
-    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.045);
+    position: relative;
+    min-height: 210px;
+    padding: 28px 22px 24px;
+    text-align: left;
+    border: 1px solid #f0dede;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 12px 28px rgba(119, 24, 24, 0.07);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    align-items: flex-start;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  }
+
+  .tp-trust-item::before {
+    position: absolute;
+    top: 0;
+    left: 22px;
+    right: 22px;
+    height: 4px;
+    border-radius: 0 0 999px 999px;
+    background: linear-gradient(90deg, #e02424, #ff9c9c);
+    content: "";
   }
 
   .tp-trust-item:hover {
-    transform: translateY(-3px);
-    border-color: #f3caca;
-    box-shadow: 0 14px 30px rgba(17, 24, 39, 0.09);
+    transform: translateY(-6px);
+    border-color: #e8a6a6;
+    box-shadow: 0 20px 38px rgba(119, 24, 24, 0.13);
   }
 
   .tp-trust-icon {
-    width: 42px;
-    height: 42px;
-    margin-bottom: 13px;
-    border-radius: 14px;
-    background: #fff0f0;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 18px;
+    border: 1px solid #f4d3d3;
+    border-radius: 17px;
+    background: linear-gradient(145deg, #fff0f0, #ffe2e2);
     color: #e02424;
     display: grid;
     place-items: center;
+    box-shadow: 0 7px 14px rgba(224, 36, 36, 0.1);
   }
 
   .tp-trust-icon svg {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
   }
 
   .tp-trust-item b {
     display: block;
-    font-size: 14px;
-    margin-bottom: 7px;
+    font-size: 16px;
+    margin-bottom: 9px;
     color: #111111;
-    font-weight: 700;
+    font-weight: 800;
   }
 
   .tp-trust-description {
-    font-size: 12.5px;
-    color: #70757d;
-    line-height: 1.5;
+    font-size: 13px;
+    color: #5f636b;
+    line-height: 1.6;
   }
 
   @media (max-width: 900px) {
@@ -149,7 +182,7 @@
 
   @media (max-width: 560px) {
     .tp-trust-wrapper {
-      padding: 36px 0 40px;
+      padding: 48px 0 52px;
     }
 
     .tp-trust-container {
@@ -157,17 +190,17 @@
     }
 
     .tp-trust-heading {
-      margin-bottom: 22px;
+      margin-bottom: 28px;
     }
 
     .tp-trust-grid {
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 14px;
     }
 
     .tp-trust-item {
       min-height: 0;
-      padding: 18px;
+      padding: 24px 20px;
     }
   }
 {% endstylesheet %}
