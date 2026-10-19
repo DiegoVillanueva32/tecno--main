@@ -23,14 +23,63 @@
           {% render 'tecno-product-card', product: product, button_theme: 'black' %}
         {%- endfor -%}
       {%- else -%}
-        {%- comment -%} Row 1 {%- endcomment -%}
         {% render 'tecno-product-card',
-          mock_title: 'Redmi Note 15 Pro',
-          mock_image: 'https://http2.mlstatic.com/D_NQ_NP_2X_617988-MLA107565433120_032026-F.webp',
-          mock_badge: '200MP',
-          mock_specs: '256GB + 12GB RAM · Cámara 200MP',
-          mock_price: '$ 1.250.000',
-          mock_compare: '$ 1.350.000',
+          mock_title: 'Parlante Premium Recargable 30W',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/parlante_rgb.png?v=1791928275',
+          mock_badge: 'TOP SONIDO',
+          mock_specs: '30W · Luces LED · Recargable',
+          mock_price: '$ 260.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'iPhone 18 Pro Max',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone18proax.webp?v=1791928266',
+          mock_badge: 'PREVENTA',
+          mock_specs: '256GB · Preventa 2026',
+          mock_price: '$ 6.400.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'Diadema AirPods Max 1:1',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/headphones.png?v=1791928274',
+          mock_badge: 'CANCELACIÓN DE RUIDO',
+          mock_specs: 'Diadema inalámbrica · Cancelación de ruido',
+          mock_price: '$ 85.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'iPhone 17 Pro Max',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/iphone17promax.webp?v=1791928268',
+          mock_badge: 'TOP VENTAS',
+          mock_specs: '256GB · Titanio',
+          mock_price: '$ 4.500.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'Apple Watch Ultra 2 Titanium',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/apple_watch_ultra.jpg?v=1791928270',
+          mock_badge: 'TITANIO',
+          mock_specs: '49mm · Caja de titanio',
+          mock_price: '$ 890.000',
+          mock_url: '/collections/all',
+          button_theme: 'black'
+        %}
+
+        {% render 'tecno-product-card',
+          mock_title: 'Samsung Galaxy S26 Ultra',
+          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/samsung_s24_ultra.png?v=1791928269',
+          mock_badge: 'GALAXY AI',
+          mock_specs: '256GB · 12GB RAM · S Pen',
+          mock_price: '$ 3.450.000',
+          mock_compare: '$ 4.190.000',
           mock_url: '/collections/all',
           button_theme: 'black'
         %}
@@ -39,72 +88,9 @@
           mock_title: 'Lenovo IdeaPad Slim 3 15IRH10',
           mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/lenovo.png?v=1791928275',
           mock_badge: 'PANTALLA TÁCTIL',
-          mock_specs: '15.3" WUXGA Táctil · Core i5-13420H · 16GB RAM · 512GB SSD',
+          mock_specs: 'Core i5 · 16GB RAM · 512GB SSD',
           mock_price: '$ 2.490.000',
           mock_compare: '$ 3.190.000',
-          mock_url: '/collections/all',
-          button_theme: 'black'
-        %}
-
-        {% render 'tecno-product-card',
-          mock_title: 'iPhone 16 Pro Max',
-          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone16promax.webp?v=1791928266',
-          mock_badge: 'SEMINUEVO',
-          mock_specs: '256GB · Chip A18 Pro · Seminuevo',
-          mock_price: '$ 2.990.000',
-          mock_compare: '$ 3.490.000',
-          mock_url: '/collections/all',
-          button_theme: 'black'
-        %}
-
-        {% render 'tecno-product-card',
-          mock_title: 'Redmi Note 15 Pro 256GB',
-          mock_image: 'https://http2.mlstatic.com/D_NQ_NP_2X_617988-MLA107565433120_032026-F.webp',
-          mock_badge: 'NUEVO 2026',
-          mock_specs: '256GB · 12GB RAM · Cámara 200MP · 5G',
-          mock_price: '$ 1.250.000',
-          mock_compare: '$ 1.450.000',
-          mock_url: '/collections/all',
-          button_theme: 'black'
-        %}
-
-        {%- comment -%} Row 2 {%- endcomment -%}
-        {% render 'tecno-product-card',
-          mock_title: 'Smartwatch Ultra Titanium',
-          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/apple_watch_ultra.jpg?v=1791928270',
-          mock_badge: 'TITANIO',
-          mock_specs: 'Pantalla AMOLED · Llamadas Bluetooth · Sumergible IP68',
-          mock_price: '$ 130.000',
-          mock_url: '/collections/all',
-          button_theme: 'black'
-        %}
-
-        {% render 'tecno-product-card',
-          mock_title: 'Parlante SoundPulse RGB',
-          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/parlante_rgb.png?v=1791928275',
-          mock_badge: 'TOP SONIDO',
-          mock_specs: 'Sonido 360° · Luces dinámicas LED · Batería 12h',
-          mock_price: '$ 95.000',
-          mock_url: '/collections/all',
-          button_theme: 'black'
-        %}
-
-        {% render 'tecno-product-card',
-          mock_title: 'Smartwatch Elegance Pro',
-          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/redmi_watch5.webp?v=1791928268',
-          mock_badge: 'TECNOLOGÍA',
-          mock_specs: 'Medición cardíaca · Notificaciones · Batería 7 días',
-          mock_price: '$ 145.000',
-          mock_url: '/collections/all',
-          button_theme: 'black'
-        %}
-
-        {% render 'tecno-product-card',
-          mock_title: 'TV Box Android 4K Ultra HD',
-          mock_image: 'https://cdn.shopify.com/s/files/1/0667/5903/2972/files/tvbox_g7.jpg?v=1791928274',
-          mock_badge: 'TECNOLOGÍA',
-          mock_specs: 'Google TV · Control por voz · Conexión Wi-Fi 5G',
-          mock_price: '$ 160.000',
           mock_url: '/collections/all',
           button_theme: 'black'
         %}
@@ -184,8 +170,8 @@
       "id": "products_to_show",
       "min": 4,
       "max": 16,
-      "step": 2,
-      "default": 8,
+      "step": 1,
+      "default": 7,
       "label": "Cantidad de productos a mostrar"
     },
     {
