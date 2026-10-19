@@ -1,8 +1,5 @@
 {%- liquid
   assign hero_collection = section.settings.collection
-  if hero_collection == blank
-    assign hero_collection = collections.all
-  endif
 -%}
 
 <section class="tp-hero-section" id="hero-{{ section.id }}">
@@ -127,23 +124,206 @@
             </div>
           {%- endif -%}
         {%- else -%}
-          <div class="tp-hero-fallback">
-            {%- if section.settings.image != blank -%}
-              {{
-                section.settings.image
-                | image_url: width: 1400
-                | image_tag: loading: 'eager', fetchpriority: 'high', alt: section.settings.title | strip_html
-              }}
-            {%- else -%}
-              <img
-                src="https://cdn.shopify.com/s/files/1/0667/5903/2972/files/fondotecnopage_017b9104-a80d-4134-99b0-80e460b1197c.jpg?v=1791928273"
-                alt="Tecnología Tecno+"
-                width="1400"
-                height="900"
-                loading="eager"
-                fetchpriority="high"
-              >
-            {%- endif -%}
+          <div class="tp-hero-slides" aria-live="polite">
+            {%- comment -%} 1. Parlante (Bocina) {%- endcomment -%}
+            <article class="tp-hero-slide is-active" data-tp-hero-slide aria-hidden="false">
+              <a class="tp-hero-product-image" href="/collections/all" tabindex="0">
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0667/5903/2972/files/parlante_rgb.png?v=1791928275"
+                  alt="Parlante Premium Recargable 30W"
+                  loading="eager"
+                  width="900"
+                  height="900"
+                >
+              </a>
+              <div class="tp-hero-product-info">
+                <div class="tp-hero-product-copy">
+                  <span class="tp-hero-product-label">TECNO+ · AUDIO & SONIDO</span>
+                  <a class="tp-hero-product-title" href="/collections/all" tabindex="0">Parlante Premium Recargable 30W</a>
+                  <div class="tp-hero-product-price">
+                    <strong>$ 260.000</strong>
+                  </div>
+                </div>
+                <a class="tp-hero-add-button" href="/collections/all" tabindex="0">
+                  <span>Ver producto</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+
+            {%- comment -%} 2. iPhone 18 Pro Max {%- endcomment -%}
+            <article class="tp-hero-slide" data-tp-hero-slide aria-hidden="true">
+              <a class="tp-hero-product-image" href="/collections/all" tabindex="-1">
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0667/5903/2972/files/phone18proax.webp?v=1791928266"
+                  alt="iPhone 18 Pro Max"
+                  loading="lazy"
+                  width="900"
+                  height="900"
+                >
+              </a>
+              <div class="tp-hero-product-info">
+                <div class="tp-hero-product-copy">
+                  <span class="tp-hero-product-label">TECNO+ · PREVENTA 2026</span>
+                  <a class="tp-hero-product-title" href="/collections/all" tabindex="-1">iPhone 18 Pro Max</a>
+                  <div class="tp-hero-product-price">
+                    <strong>$ 6.400.000</strong>
+                  </div>
+                </div>
+                <a class="tp-hero-add-button" href="/collections/all" tabindex="-1">
+                  <span>Ver producto</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+
+            {%- comment -%} 3. Diademas AirPods Max 1:1 {%- endcomment -%}
+            <article class="tp-hero-slide" data-tp-hero-slide aria-hidden="true">
+              <a class="tp-hero-product-image" href="/collections/all" tabindex="-1">
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0667/5903/2972/files/headphones.png?v=1791928274"
+                  alt="Diadema AirPods Max 1:1 Cancelación de Ruido"
+                  loading="lazy"
+                  width="900"
+                  height="900"
+                >
+              </a>
+              <div class="tp-hero-product-info">
+                <div class="tp-hero-product-copy">
+                  <span class="tp-hero-product-label">TECNO+ · CANCELACIÓN DE RUIDO</span>
+                  <a class="tp-hero-product-title" href="/collections/all" tabindex="-1">Diadema AirPods Max 1:1</a>
+                  <div class="tp-hero-product-price">
+                    <strong>$ 85.000</strong>
+                  </div>
+                </div>
+                <a class="tp-hero-add-button" href="/collections/all" tabindex="-1">
+                  <span>Ver producto</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+
+            {%- comment -%} 4. iPhone 17 Pro Max {%- endcomment -%}
+            <article class="tp-hero-slide" data-tp-hero-slide aria-hidden="true">
+              <a class="tp-hero-product-image" href="/collections/all" tabindex="-1">
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0667/5903/2972/files/iphone17promax.webp?v=1791928268"
+                  alt="iPhone 17 Pro Max"
+                  loading="lazy"
+                  width="900"
+                  height="900"
+                >
+              </a>
+              <div class="tp-hero-product-info">
+                <div class="tp-hero-product-copy">
+                  <span class="tp-hero-product-label">TECNO+ · TOP VENTAS</span>
+                  <a class="tp-hero-product-title" href="/collections/all" tabindex="-1">iPhone 17 Pro Max</a>
+                  <div class="tp-hero-product-price">
+                    <strong>$ 4.500.000</strong>
+                  </div>
+                </div>
+                <a class="tp-hero-add-button" href="/collections/all" tabindex="-1">
+                  <span>Ver producto</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+
+            {%- comment -%} 5. Smartwatch Ultra {%- endcomment -%}
+            <article class="tp-hero-slide" data-tp-hero-slide aria-hidden="true">
+              <a class="tp-hero-product-image" href="/collections/all" tabindex="-1">
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0667/5903/2972/files/apple_watch_ultra.jpg?v=1791928270"
+                  alt="Apple Watch Ultra 2 Titanium"
+                  loading="lazy"
+                  width="900"
+                  height="900"
+                >
+              </a>
+              <div class="tp-hero-product-info">
+                <div class="tp-hero-product-copy">
+                  <span class="tp-hero-product-label">TECNO+ · TITANIO</span>
+                  <a class="tp-hero-product-title" href="/collections/all" tabindex="-1">Smartwatch Ultra Titanium</a>
+                  <div class="tp-hero-product-price">
+                    <strong>$ 890.000</strong>
+                  </div>
+                </div>
+                <a class="tp-hero-add-button" href="/collections/all" tabindex="-1">
+                  <span>Ver producto</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+
+            {%- comment -%} 6. Celular Samsung {%- endcomment -%}
+            <article class="tp-hero-slide" data-tp-hero-slide aria-hidden="true">
+              <a class="tp-hero-product-image" href="/collections/all" tabindex="-1">
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0667/5903/2972/files/samsung_s24_ultra.png?v=1791928269"
+                  alt="Samsung Galaxy S26 Ultra"
+                  loading="lazy"
+                  width="900"
+                  height="900"
+                >
+              </a>
+              <div class="tp-hero-product-info">
+                <div class="tp-hero-product-copy">
+                  <span class="tp-hero-product-label">TECNO+ · GALAXY AI</span>
+                  <a class="tp-hero-product-title" href="/collections/all" tabindex="-1">Samsung Galaxy S26 Ultra</a>
+                  <div class="tp-hero-product-price">
+                    <s>$ 4.190.000</s>
+                    <strong>$ 3.450.000</strong>
+                  </div>
+                </div>
+                <a class="tp-hero-add-button" href="/collections/all" tabindex="-1">
+                  <span>Ver producto</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+
+            {%- comment -%} 7. Computador Laptop {%- endcomment -%}
+            <article class="tp-hero-slide" data-tp-hero-slide aria-hidden="true">
+              <a class="tp-hero-product-image" href="/collections/all" tabindex="-1">
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0667/5903/2972/files/lenovo.png?v=1791928275"
+                  alt="Lenovo IdeaPad Slim 3 15IRH10"
+                  loading="lazy"
+                  width="900"
+                  height="900"
+                >
+              </a>
+              <div class="tp-hero-product-info">
+                <div class="tp-hero-product-copy">
+                  <span class="tp-hero-product-label">TECNO+ · LAPTOPS & CÓMPUTO</span>
+                  <a class="tp-hero-product-title" href="/collections/all" tabindex="-1">Lenovo IdeaPad Slim 3 15IRH10</a>
+                  <div class="tp-hero-product-price">
+                    <s>$ 3.190.000</s>
+                    <strong>$ 2.490.000</strong>
+                  </div>
+                </div>
+                <a class="tp-hero-add-button" href="/collections/all" tabindex="-1">
+                  <span>Ver producto</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+          </div>
+
+          <button class="tp-hero-arrow tp-hero-prev" type="button" data-tp-hero-prev aria-label="Producto anterior">
+            <span aria-hidden="true">‹</span>
+          </button>
+          <button class="tp-hero-arrow tp-hero-next" type="button" data-tp-hero-next aria-label="Siguiente producto">
+            <span aria-hidden="true">›</span>
+          </button>
+          <div class="tp-hero-dots" aria-label="Elegir producto">
+            <button class="tp-hero-dot is-active" type="button" data-tp-hero-dot="0" aria-label="Ver producto 1" aria-current="true"></button>
+            <button class="tp-hero-dot" type="button" data-tp-hero-dot="1" aria-label="Ver producto 2" aria-current="false"></button>
+            <button class="tp-hero-dot" type="button" data-tp-hero-dot="2" aria-label="Ver producto 3" aria-current="false"></button>
+            <button class="tp-hero-dot" type="button" data-tp-hero-dot="3" aria-label="Ver producto 4" aria-current="false"></button>
+            <button class="tp-hero-dot" type="button" data-tp-hero-dot="4" aria-label="Ver producto 5" aria-current="false"></button>
+            <button class="tp-hero-dot" type="button" data-tp-hero-dot="5" aria-label="Ver producto 6" aria-current="false"></button>
+            <button class="tp-hero-dot" type="button" data-tp-hero-dot="6" aria-label="Ver producto 7" aria-current="false"></button>
           </div>
         {%- endif -%}
       </div>
