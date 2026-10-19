@@ -2,7 +2,33 @@
   assign hero_collection = section.settings.collection
 -%}
 
-<section class="tp-hero-section" id="hero-{{ section.id }}">
+<section class="tp-hero-section" id="inicio">
+  <div class="tp-hero-bg">
+    {%- if section.settings.image != blank -%}
+      {{
+        section.settings.image
+        | image_url: width: 2800
+        | image_tag:
+          loading: 'eager',
+          fetchpriority: 'high',
+          class: 'tp-hero-bg-img',
+          alt: section.settings.title | escape
+      }}
+    {%- else -%}
+      <img
+        src="{{ 'espacio-tecnologico-fondo.png' | asset_url }}"
+        alt="Tecno+ Espacio Tecnológico"
+        class="tp-hero-bg-img"
+        loading="eager"
+        fetchpriority="high"
+        width="2560"
+        height="1440"
+      >
+    {%- endif -%}
+    <div class="tp-hero-bg-overlay"></div>
+    <div class="tp-hero-bg-bottom-fade"></div>
+  </div>
+
   <div class="tp-hero-container">
     <div class="tp-hero-layout">
       <div class="tp-hero-content">
@@ -333,18 +359,63 @@
 
 {% stylesheet %}
   .tp-hero-section {
-    min-height: min(720px, calc(100vh - 65px));
+    position: relative;
+    z-index: 1;
+    min-height: min(740px, calc(100vh - 65px));
     display: flex;
     align-items: center;
     overflow: hidden;
-    background: #ffffff;
     padding: 56px 0 64px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  }
+
+  .tp-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .tp-hero-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+  }
+
+  .tp-hero-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.94) 0%,
+      rgba(255, 255, 255, 0.88) 42%,
+      rgba(255, 255, 255, 0.55) 70%,
+      rgba(255, 255, 255, 0.35) 100%
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .tp-hero-bg-bottom-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 90px;
+    background: linear-gradient(to top, #ffffff 15%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+    z-index: 3;
   }
 
   .tp-hero-container {
     width: min(1240px, calc(100% - 48px));
     margin: 0 auto;
+    position: relative;
+    z-index: 4;
   }
 
   .tp-hero-layout {
@@ -441,10 +512,12 @@
     position: relative;
     min-width: 0;
     padding: 18px 18px 62px;
-    border: 1px solid #eceef1;
+    border: 1px solid rgba(255, 255, 255, 0.7);
     border-radius: 30px;
-    background: linear-gradient(145deg, #fafafa, #f1f2f4);
-    box-shadow: 0 24px 60px rgba(17, 24, 39, 0.1);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 24px 60px rgba(17, 24, 39, 0.12);
   }
 
   .tp-hero-slides {
