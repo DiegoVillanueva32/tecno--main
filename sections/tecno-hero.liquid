@@ -384,6 +384,9 @@
     object-fit: cover;
     object-position: center center;
     display: block;
+    filter: blur(4px);
+    transform: scale(1.05);
+    transition: filter 0.3s ease;
   }
 
   .tp-hero-bg-overlay {
@@ -391,10 +394,10 @@
     inset: 0;
     background: linear-gradient(
       to right,
-      rgba(255, 255, 255, 0.94) 0%,
-      rgba(255, 255, 255, 0.88) 42%,
-      rgba(255, 255, 255, 0.55) 70%,
-      rgba(255, 255, 255, 0.35) 100%
+      rgba(8, 10, 14, 0.82) 0%,
+      rgba(10, 12, 18, 0.70) 38%,
+      rgba(12, 15, 22, 0.45) 68%,
+      rgba(14, 18, 26, 0.25) 100%
     );
     pointer-events: none;
     z-index: 2;
@@ -406,7 +409,7 @@
     left: 0;
     right: 0;
     height: 90px;
-    background: linear-gradient(to top, #ffffff 15%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(to top, #ffffff 10%, rgba(255, 255, 255, 0) 100%);
     pointer-events: none;
     z-index: 3;
   }
@@ -435,9 +438,10 @@
     font-size: 13px;
     letter-spacing: 0.16em;
     font-weight: 800;
-    color: #e02424;
+    color: #ff3b3b;
     text-transform: uppercase;
     margin-bottom: 8px;
+    text-shadow: 0 0 16px rgba(255, 59, 59, 0.65), 0 0 30px rgba(255, 59, 59, 0.35);
   }
 
   .tp-hero-title {
@@ -446,19 +450,22 @@
     letter-spacing: -0.045em;
     margin: 12px 0 24px;
     font-weight: 900;
-    color: #111111;
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 255, 255, 0.25), 0 2px 8px rgba(0, 0, 0, 0.6);
   }
 
   .tp-hero-title span {
-    color: #e02424;
+    color: #ff2a2a;
+    text-shadow: 0 0 22px rgba(255, 42, 42, 0.8), 0 0 45px rgba(255, 42, 42, 0.45), 0 2px 8px rgba(0, 0, 0, 0.6);
   }
 
   .tp-hero-subtitle {
-    color: #666666;
+    color: rgba(255, 255, 255, 0.92);
     font-size: 17px;
     line-height: 1.6;
     margin: 0 0 30px;
     max-width: 520px;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
   }
 
   .tp-hero-actions {
