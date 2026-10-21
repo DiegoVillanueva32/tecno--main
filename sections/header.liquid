@@ -150,7 +150,7 @@
       {%- if request.page_type == 'index' -%}
         <h1 class="header__heading">
       {%- endif -%}
-          <a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset">
+          <a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset" onclick="if(window.innerWidth < 990){ event.preventDefault(); if(window.toggleTecnoMobileMenu){ window.toggleTecnoMobileMenu(); } }">
             {%- if settings.logo != blank -%}
               <div class="header__heading-logo-wrapper">
                 {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
@@ -193,7 +193,7 @@
       {%- if request.page_type == 'index' -%}
         <h1 class="header__heading">
       {%- endif -%}
-          <a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset">
+          <a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset" onclick="if(window.innerWidth < 990){ event.preventDefault(); if(window.toggleTecnoMobileMenu){ window.toggleTecnoMobileMenu(); } }">
             {%- if settings.logo != blank -%}
               <div class="header__heading-logo-wrapper">
                 {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
@@ -276,6 +276,30 @@
     </div>
   </header>
 </{% if section.settings.sticky_header_type != 'none' %}sticky-header{% else %}div{% endif %}>
+
+<script>
+  window.toggleTecnoMobileMenu = function() {
+    var headerDrawer = document.querySelector('header-drawer');
+    if (!headerDrawer) return;
+    var details = headerDrawer.querySelector('#Details-menu-drawer-container') || headerDrawer.querySelector('details');
+    if (!details) return;
+
+    var summary = details.querySelector('summary.header__icon--menu') || details.querySelector('summary');
+    if (summary) {
+      summary.click();
+    } else {
+      if (details.hasAttribute('open')) {
+        details.removeAttribute('open');
+        details.classList.remove('menu-opening');
+        document.body.classList.remove('overflow-hidden-tablet', 'overflow-hidden-desktop');
+      } else {
+        details.setAttribute('open', '');
+        details.classList.add('menu-opening');
+        document.body.classList.add('overflow-hidden-tablet');
+      }
+    }
+  };
+</script>
 
 {%- if settings.cart_type == "notification" -%}
   {%- render 'cart-notification', color_scheme: section.settings.color_scheme, desktop_menu_type: section.settings.menu_type_desktop -%}
